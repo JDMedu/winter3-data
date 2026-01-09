@@ -1894,12 +1894,12 @@
             <div id="githubSetup" class="setup-section">
                 <h3>🔧 GitHub 저장소 설정</h3>
                 <p><strong>처음 사용 시 한 번만 설정하면 됩니다!</strong></p>
-                <p>1. GitHub에서 새 저장소를 만드세요 (예: grade3-data)</p>
+                <p>1. GitHub에서 새 저장소를 만드세요 (예: winter3-data)</p>
                 <p>2. 저장소를 Public으로 설정하고 GitHub Pages를 활성화하세요</p>
                 <p>3. 아래에 저장소 정보를 입력하세요:</p>
                 
                 <input type="text" id="githubUsername" class="setup-input" placeholder="GitHub 사용자명 (예: myusername)" autocomplete="off">
-                <input type="text" id="githubRepo" class="setup-input" placeholder="저장소 이름 (예: grade3-data)" autocomplete="off">
+                <input type="text" id="githubRepo" class="setup-input" placeholder="저장소 이름 (예: winter3-data)" autocomplete="off">
                 <input type="password" id="githubToken" class="setup-input" placeholder="GitHub Personal Access Token (선택사항)">
                 
                 <button onclick="saveGitHubConfig()" class="setup-btn">설정 저장</button>
@@ -3530,10 +3530,10 @@ document.addEventListener('click', function(e) {
             var today = new Date();
             
             // 고2/고3 구분 (페이지 제목으로 판단)
-            var isGrade3 = document.title.includes('고3');
+            var iswinter3 = document.title.includes('고3');
             
             var examDate;
-            if (isGrade3) {
+            if (iswinter3) {
                 examDate = new Date('2025-11-13'); // 고3: 25년 11.13.(목)
             } else {
                 examDate = new Date('2026-11-19'); // 고2: 26년 11.19.(목)
@@ -3545,7 +3545,7 @@ document.addEventListener('click', function(e) {
             return {
                 days: diffDays,
                 examDate: examDate,
-                isGrade3: isGrade3
+                iswinter3: iswinter3
             };
         }
         
@@ -3605,7 +3605,7 @@ document.addEventListener('click', function(e) {
             return `
                 <!-- D-day 카운터 -->
                 <div class="dday-counter">
-                    <div class="dday-text">${dday.isGrade3 ? '🎯 수능' : '📚 수능'}까지</div>
+                    <div class="dday-text">${dday.iswinter3 ? '🎯 수능' : '📚 수능'}까지</div>
                     <div class="dday-number">D-${dday.days}</div>
                     <div style="font-size: 1em; opacity: 0.9;">
                         ${dday.examDate.toLocaleDateString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'})}
@@ -4497,7 +4497,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             
             if (password === '1212') {
                 isAdminAuthenticated = true;
-                localStorage.setItem('grade3-adminAuth', 'true');
+                localStorage.setItem('winter3-adminAuth', 'true');
                 
                 document.getElementById('adminAuthSection').style.display = 'none';
                 document.getElementById('githubSetup').style.display = 'block';
@@ -4515,9 +4515,9 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         // 관리자 접근 초기화
         function resetAdminAccess() {
             isAdminAuthenticated = false;
-            localStorage.removeItem('grade3-adminAuth');        // ✅ 수정
-            localStorage.removeItem('grade3-githubConfig');     // ✅ 수정
-            localStorage.removeItem('grade3-dataUrl');          // ✅ 수정
+            localStorage.removeItem(''winter3-adminAuth');        // ✅ 수정
+            localStorage.removeItem(''winter3-githubConfig');     // ✅ 수정
+            localStorage.removeItem(''winter3-dataUrl');          // ✅ 수정
             
             document.getElementById('adminAuthSection').style.display = 'block';
             document.getElementById('githubSetup').style.display = 'none';
@@ -4529,8 +4529,8 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         
         // 기존 설정 로드
         function loadExistingConfig() {
-            var savedConfig = localStorage.getItem('grade3-githubConfig');
-            var savedDataUrl = localStorage.getItem('grade3-dataUrl');
+            var savedConfig = localStorage.getItem('winter3-githubConfig');
+            var savedDataUrl = localStorage.getItem('winter3-dataUrl');
             
             if (savedConfig && savedDataUrl) {
                 try {
@@ -4581,7 +4581,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         
         // 관리자 인증 상태 확인
         function checkAdminAuthStatus() {
-            var savedAuth = localStorage.getItem('adminAuth');
+            var savedAuth = localStorage.getItem('winter3-adminAuth');
             
             if (savedAuth === 'true') {
                 isAdminAuthenticated = true;
@@ -4618,10 +4618,10 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                 token: token
             };
             
-            dataUrl = 'https://raw.githubusercontent.com/' + username + '/' + repo + '/main/grade3-data.json';
+            dataUrl = 'https://raw.githubusercontent.com/' + username + '/' + repo + '/main/winter3-data.json';
             
-            localStorage.setItem('grade3-githubConfig', JSON.stringify(githubConfig));
-            localStorage.setItem('grade3-dataUrl', dataUrl);
+            localStorage.setItem('winter3-githubConfig', JSON.stringify(githubConfig));
+            localStorage.setItem('winter3-dataUrl', dataUrl);
             
             showStatus('GitHub 설정이 저장되었습니다!', 'success');
             
@@ -4742,7 +4742,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                 throw new Error('GitHub 설정이 필요합니다.');
             }
             
-            var apiUrl = 'https://api.github.com/repos/' + githubConfig.username + '/' + githubConfig.repo + '/contents/grade3-data.json';
+            var apiUrl = 'https://api.github.com/repos/' + githubConfig.username + '/' + githubConfig.repo + '/contents/winter3-data.json';
             
             return fetch(apiUrl)
                 .then(function(response) {
@@ -4850,7 +4850,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                     var workbook = XLSX.read(data, {type: 'array'});
                     
                     updateProgress(50, '고3 학생 데이터 처리 중...');
-                    parseExcelDataGrade3(workbook);
+                    parseExcelDatawinter3(workbook);
                     
                     updateProgress(70, 'GitHub에 업로드 중...');
                     
@@ -4896,8 +4896,8 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         
             
                
-        // parseExcelDataGrade3 함수 수정 (기존 등급컷 처리 부분 교체)
-        function parseExcelDataGrade3(workbook) {
+        // parseExcelDatawinter3 함수 수정 (기존 등급컷 처리 부분 교체)
+        function parseExcelDatawinter3(workbook) {
             var attendanceToNameMap = {};
             var studentsByName = {};
             var testSources = {};
@@ -5018,7 +5018,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             
             // 5. 만점 추출
             console.log('=== 고3 만점 추출 시작 ===');
-            extractMaxScoresGrade3(workbook, testSheetNames);
+            extractMaxScoreswinter3(workbook, testSheetNames);
             console.log('추출 완료된 maxScores:', maxScores);
             
             // 6. 학생 데이터 처리
@@ -5137,7 +5137,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             }
         }
 
-        function extractMaxScoresGrade3(workbook, testSheetNames) {
+        function extractMaxScoreswinter3(workbook, testSheetNames) {
             console.log('고3 각 시트에서 직접 만점 추출 시작...');
             
             maxScores = {};
@@ -5626,7 +5626,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 
                 if (hostname.includes('.github.io')) {
                     var username = hostname.split('.')[0];
-                    var repo = pathname.split('/')[1] || 'grade3-data';
+                    var repo = pathname.split('/')[1] || 'winter3-data';
                     
                     if (username && repo) {
                         console.log('GitHub Pages에서 자동 감지된 설정:', username, repo);
@@ -5640,8 +5640,8 @@ document.getElementById('studyPlanSection').style.display = 'block';
             }
             
             // 저장된 GitHub 설정 불러오기
-            var savedConfig = localStorage.getItem('grade3-githubConfig');
-            var savedDataUrl = localStorage.getItem('grade3-dataUrl');
+            var savedConfig = localStorage.getItem('winter3-githubConfig');
+            var savedDataUrl = localStorage.getItem('winter3-dataUrl');
             
             var finalConfig = null;
             var configSource = '';
@@ -5662,11 +5662,11 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 console.log('설정 사용 (' + configSource + '):', finalConfig);
                 
                 githubConfig = finalConfig;
-                dataUrl = 'https://raw.githubusercontent.com/' + finalConfig.username + '/' + finalConfig.repo + '/main/grade3-data.json';
+                dataUrl = 'https://raw.githubusercontent.com/' + finalConfig.username + '/' + finalConfig.repo + '/main/winter3-data.json';
                 
                 // localStorage에 저장 (다음에 더 빠르게 로드하기 위해)
-                localStorage.setItem('grade3-githubConfig', JSON.stringify(githubConfig));
-                localStorage.setItem('grade3-dataUrl', dataUrl);
+                localStorage.setItem('winter3-githubConfig', JSON.stringify(githubConfig));
+                localStorage.setItem('winter3-dataUrl', dataUrl);
                 
                 console.log('데이터 로드 시작...');
                 // 약간의 지연 후 데이터 로드 시도
