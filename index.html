@@ -3525,7 +3525,7 @@ document.addEventListener('click', function(e) {
     }
 });
         
-        // 📅 D-day 계산
+                // 📅 D-day 계산
         function calculateDday() {
             var today = new Date();
             
@@ -3534,9 +3534,9 @@ document.addEventListener('click', function(e) {
             
             var examDate;
             if (iswinter3) {
-                examDate = new Date('2025-11-13'); // 고3: 25년 11.13.(목)
+                examDate = new Date('2026-11-19'); // ✅ 고3: 26년 11.19.(목)
             } else {
-                examDate = new Date('2026-11-19'); // 고2: 26년 11.19.(목)
+                examDate = new Date('2027-11-18'); // 고2: 27년 11.18.(목) 예상
             }
             
             var diffTime = examDate - today;
@@ -3548,7 +3548,7 @@ document.addEventListener('click', function(e) {
                 iswinter3: iswinter3
             };
         }
-        
+                
         // 📈 성적 그래프 생성
         function createGradeChart(student) {
             var grades = student.grades;
@@ -3619,10 +3619,6 @@ document.addEventListener('click', function(e) {
                         <div class="stat-item">
                             <span class="stat-label">평균 점수</span>
                             <span class="stat-value">${stats.avgScore}점</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">평균 등급</span>
-                            <span class="stat-value">${stats.avgGrade}등급</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">최고 성적</span>
@@ -5302,11 +5298,11 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             }
             
             displayStudentInfo(student);
+            displaySummaryTable(student);  // ✅ AI 분석 전으로 이동
+            displayGrades(student.grades);  // ✅ AI 분석 전으로 이동
             generateAIAnalysis(student); // AI 분석 실행
-            displaySummaryTable(student);
-            displayGrades(student.grades);
             resultsDiv.style.display = 'block';
-
+            
            // 뱃지 툴팁 이벤트를 더 긴 지연 후 실행
             setTimeout(addBadgeTooltipEvents, 500);
 
@@ -5398,7 +5394,6 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '<thead><tr>';
             tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">시험</th>';
             tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">선택과목</th>';
-            tableHtml += '<th style="min-width: 50px; font-size: 0.85em;">등급</th>';
             tableHtml += '<th style="min-width: 50px; font-size: 0.85em;">점수</th>';
             tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">독서(인문이론)</th>';
             tableHtml += '<th style="min-width: 60px; font-size: 0.85em;">독서(사회)</th>';
@@ -5409,7 +5404,6 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '<th style="min-width: 90px; font-size: 0.85em;">문학(고전소설)</th>';
             tableHtml += '<th style="min-width: 70px; font-size: 0.85em;">언어화법</th>';
             tableHtml += '<th style="min-width: 70px; font-size: 0.85em;">매체작문</th>';
-            tableHtml += '<th style="min-width: 70px; font-size: 0.85em;">시험출처</th>';
             tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
