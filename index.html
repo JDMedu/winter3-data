@@ -4515,9 +4515,9 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         // 관리자 접근 초기화
         function resetAdminAccess() {
             isAdminAuthenticated = false;
-            localStorage.removeItem(''winter3-adminAuth');        // ✅ 수정
-            localStorage.removeItem(''winter3-githubConfig');     // ✅ 수정
-            localStorage.removeItem(''winter3-dataUrl');          // ✅ 수정
+            localStorage.removeItem('winter3-adminAuth');         
+            localStorage.removeItem('winter3-githubConfig');      
+            localStorage.removeItem('winter3-dataUrl');
             
             document.getElementById('adminAuthSection').style.display = 'block';
             document.getElementById('githubSetup').style.display = 'none';
