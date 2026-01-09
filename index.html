@@ -4544,46 +4544,46 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                         document.getElementById('githubToken').value = githubConfig.token;
                     }
                     
-                    // UI 전환
-                    document.getElementById('githubSetup').style.display = 'none';
-                    document.getElementById('uploadSection').style.display = 'block';
-                    
-                    // 데이터 로드 시도
-                    loadDataFromGitHub();
-                } catch (error) {
-                    console.error('설정 로드 실패:', error);
-                }
+// UI 전환
+                document.getElementById('githubSetup').style.display = 'none';
+                document.getElementById('uploadSection').style.display = 'block';
+                
+                // 데이터 로드 시도
+                loadDataFromGitHub();
+            } catch (error) {
+                console.error('설정 로드 실패:', error);
             }
         }
-
-        function switchTab(tabName) {
-            var tabs = document.querySelectorAll('.tab');
-            var contents = document.querySelectorAll('.tab-content');
-            
-            for (var i = 0; i < tabs.length; i++) {
-                tabs[i].classList.remove('active');
-            }
-            for (var i = 0; i < contents.length; i++) {
-                contents[i].classList.remove('active');
-            }
-            
-            if (tabName === 'student') {
-                document.querySelector('.tab').classList.add('active');
-                document.getElementById('studentTab').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab')[1].classList.add('active');
-                document.getElementById('adminTab').classList.add('active');
-                
-                // 관리자 탭 접근 시 인증 상태 확인
-                checkAdminAuthStatus();
-            }
+    }
+    
+    function switchTab(tabName) {
+        var tabs = document.querySelectorAll('.tab');
+        var contents = document.querySelectorAll('.tab-content');
+        
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        for (var i = 0; i < contents.length; i++) {
+            contents[i].classList.remove('active');
         }
         
-        // 관리자 인증 상태 확인
-        function checkAdminAuthStatus() {
-            var savedAuth = localStorage.getItem('winter3-adminAuth');
+        if (tabName === 'student') {
+            document.querySelector('.tab').classList.add('active');
+            document.getElementById('studentTab').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab')[1].classList.add('active');
+            document.getElementById('adminTab').classList.add('active');
             
-            if (savedAuth === 'true') {
+            // 관리자 탭 접근 시 인증 상태 확인
+            checkAdminAuthStatus();
+        }
+    }
+    
+    // 관리자 인증 상태 확인
+    function checkAdminAuthStatus() {
+        var savedAuth = localStorage.getItem('winter3-adminAuth');
+        
+        if (savedAuth === 'true') {
                 isAdminAuthenticated = true;
                 document.getElementById('adminAuthSection').style.display = 'none';
                 document.getElementById('githubSetup').style.display = 'block';
