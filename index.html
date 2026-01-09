@@ -3763,7 +3763,7 @@ ${badges.length > 0 ?
         var isAdminAuthenticated = false;
         
         var maxScores = {}; // 하드코딩된 값 제거, 엑셀에서 추출한 값만 사용
-        var gradeCutData = {}; // 고3 전용: 등급컷 데이터
+        
         
         // 분석 함수
         function generateAIAnalysis(student) {
@@ -4708,7 +4708,6 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                     
                     studentByNumber = data.students || {};
                     maxScores = Object.assign({}, maxScores, data.maxScores || {});
-                    gradeCutData = data.gradeCuts || {}; // 고3 전용: 등급컷 데이터
                     window.discoveredTestSheets = data.testSheets || [];
                     window.attendanceToNameMap = data.attendanceMap || {};
                     
@@ -4858,7 +4857,6 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                     var uploadData = {
                     students: studentByNumber,
                     maxScores: maxScores,
-                    gradeCuts: gradeCutData,
                     testSheets: window.discoveredTestSheets,
                     attendanceMap: window.attendanceToNameMap,
                     lastUpdated: new Date().toISOString()
@@ -4894,62 +4892,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             reader.readAsArrayBuffer(file);
         }
 
-        // 등급컷 처리 함수 (3번째 시트에서 읽기)
-        function processGradeCuts(workbook) {
-            gradeCutData = {}; // 초기화
-            
-            // 3번째 시트에서 등급컷 정보 읽기
-            var gradeCutSheetName = workbook.SheetNames[2]; // 3번째 시트 (인덱스 2)
-            if (!workbook.Sheets[gradeCutSheetName]) {
-                console.log('등급컷 시트를 찾을 수 없습니다:', gradeCutSheetName);
-                return;
-            }
-            
-            var gradeCutSheet = workbook.Sheets[gradeCutSheetName];
-            var gradeCutSheetData = XLSX.utils.sheet_to_json(gradeCutSheet, {header: 1});
-            
-            console.log('등급컷 시트 처리 중:', gradeCutSheetName);
-            console.log('등급컷 원본 데이터:', gradeCutSheetData);
-            
-            // A열: 시험명, B열: 시험출처, C열: 선택과목, D열부터: 1등급, 2등급, 3등급...
-            for (var i = 1; i < gradeCutSheetData.length; i++) {
-                var row = gradeCutSheetData[i];
-                if (!row || !row[0] || !row[2]) continue; // A열(시험명)과 C열(선택과목)이 없으면 스킵
-                
-                var testName = row[0].toString().trim();
-                var source = row[1] ? row[1].toString().trim() : '';
-                var subjectType = row[2].toString().trim();
-                
-                // 시험명 정규화 (공백 제거)
-                var normalizedTestName = testName.replace(/\s/g, '');
-                
-                console.log('등급컷 처리:', normalizedTestName, '/', subjectType);
-                
-                if (!gradeCutData[normalizedTestName]) {
-                gradeCutData[normalizedTestName] = {};
-            }
-                
-                // D열부터 등급컷 정보 (D=1등급, E=2등급, F=3등급...)
-                var cuts = {};
-                for (var grade = 1; grade <= 9; grade++) {
-                    var cutScore = row[3 + grade - 1]; // D열은 인덱스 3
-                    if (cutScore !== null && cutScore !== undefined && cutScore !== '') {
-                        cuts[grade] = parseInt(cutScore);
-                        console.log('  ', grade + '등급:', cuts[grade] + '점');
-                    }
-                }
-                
-                gradeCutData[normalizedTestName][subjectType] = {
-                source: source,
-                cuts: cuts
-            };
-            
-            console.log('등급컷 저장 완료:', normalizedTestName, subjectType, cuts);
-            }
-            
-            console.log('=== 최종 등급컷 데이터 ===');
-            console.log(gradeCutData);
-        }
+        
         
             
                
@@ -4962,9 +4905,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             console.log('=== 고3 엑셀 데이터 파싱 시작 ===');
             console.log('시트 목록:', workbook.SheetNames);
             
-           // 1. 등급컷 처리 (3번째 시트)
-            processGradeCuts(workbook);
-            
+                       
             // 2. 첫번째 시트에서 시험 출처 정보 추출 (고2 방식)
             extractTestSourcesFromFirstSheet(workbook);
 
@@ -5159,34 +5100,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                         finalGrade = parseInt(gradeFromSheet);
                     }
                     
-                    // 3. 필요점수는 3번째 시트 등급컷으로 계산
-                    var gradeCut = '';
-                    var needScore = null;
-                    
-                    if (finalGrade && finalSubjectType && scoreFromSheet && gradeCutData[sheetName]) {
-                        var cuts = gradeCutData[sheetName][finalSubjectType];
-                        
-                        if (cuts && cuts.cuts) {
-                            gradeCut = cuts.cuts[finalGrade] || '';
-                            
-                            // 한 등급 올리기 위해 필요한 점수 계산
-                            if (finalGrade > 1 && cuts.cuts[finalGrade - 1]) {
-                                needScore = cuts.cuts[finalGrade - 1] - parseInt(scoreFromSheet);
-                                
-                                // 이미 달성한 경우
-                                if (needScore <= 0) {
-                                    needScore = 0;
-                                }
-                            }
-                        }
-                    }
-                    
-                    console.log('최종 결과:', sheetName, name);
-                    console.log('  점수:', scoreFromSheet);
-                    console.log('  선택과목:', finalSubjectType);
-                    console.log('  등급:', finalGrade);
-                    console.log('  등급컷:', gradeCut);
-                    console.log('  다음 등급까지:', needScore, '점');
+                   
                     
                     studentsByName[name].grades[sheetName] = {
                         grade: finalGrade,
@@ -5194,8 +5108,6 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                         subjectType: finalSubjectType,
                         details: details,
                         ratios: ratios,
-                        needScore: needScore,
-                        gradeCut: gradeCut,
                         source: source
                     };
                 }
@@ -5307,7 +5219,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             var totalStudents = Object.keys(studentByNumber).length;
             var mappingCount = window.attendanceToNameMap ? Object.keys(window.attendanceToNameMap).length : 0;
             var discoveredSheets = window.discoveredTestSheets ? window.discoveredTestSheets.length : 0;
-            var gradeCutCount = Object.keys(gradeCutData).length;
+            
             
             var html = '<div class="summary-item"><div class="summary-value">' + mappingCount + '</div><div class="summary-label">매핑 테이블 학생수</div></div>';
             html += '<div class="summary-item"><div class="summary-value">' + totalStudents + '</div><div class="summary-label">성적 데이터 학생수</div></div>';
@@ -5453,10 +5365,6 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '<thead><tr>';
             tableHtml += '<th class="test-name">시험</th>';
             tableHtml += '<th>선택과목</th>';
-            tableHtml += '<th>등급</th>';
-            tableHtml += '<th>점수</th>';
-            tableHtml += '<th>등급컷</th>';
-            tableHtml += '<th>필요점수</th>';
             tableHtml += '<th>출처</th>';
             tableHtml += '</tr></thead><tbody>';
             
@@ -5464,30 +5372,17 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 var testName = allTests[i];
                 var gradeData = student.grades[testName];
                 
+                // 미응시한 시험은 건너뛰기
+                if (!gradeData) continue;
+                
                 tableHtml += '<tr>';
                 tableHtml += '<td class="test-name">' + testName + '</td>';
                 
-                if (gradeData) {
-                    var subjectTypeClass = (gradeData.subjectType || '').replace(/\s/g, '_');
-                    tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
-                    tableHtml += '<td class="grade-cell grade-' + gradeData.grade + '">' + gradeData.grade + '</td>';
-                    tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
-                    tableHtml += '<td class="score-cell">' + (gradeData.gradeCut || '-') + '</td>';
-                    
-                    var needScoreDisplay = '';
-                    if (gradeData.needScore !== null && gradeData.needScore !== undefined) {
-                        needScoreDisplay = gradeData.needScore > 0 ? '(' + gradeData.needScore + ')' : '달성';
-                    }
-                    tableHtml += '<td class="score-cell">' + needScoreDisplay + '</td>';
-                    tableHtml += '<td class="source-cell">' + (gradeData.source || '-') + '</td>';
-                } else {
-                    tableHtml += '<td class="absent-cell">-</td>';
-                    tableHtml += '<td class="absent-cell">미응시</td>';
-                    tableHtml += '<td class="absent-cell">-</td>';
-                    tableHtml += '<td class="absent-cell">-</td>';
-                    tableHtml += '<td class="absent-cell">-</td>';
-                    tableHtml += '<td class="absent-cell">-</td>';
-                }
+                var subjectTypeClass = (gradeData.subjectType || '').replace(/\s/g, '_');
+                tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
+                tableHtml += '<td class="grade-cell grade-' + gradeData.grade + '">' + gradeData.grade + '</td>';
+                tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
+                tableHtml += '<td class="source-cell">' + (gradeData.source || '-') + '</td>';
                 
                 tableHtml += '</tr>';
             }
@@ -5516,13 +5411,14 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
-                var testName = allTests[i];
-                var gradeData = student.grades[testName];
-                
-                tableHtml += '<tr>';
-                tableHtml += '<td class="test-name" style="font-size: 0.85em;">' + testName + '</td>';
-                
-                if (gradeData) {
+                    var testName = allTests[i];
+                    var gradeData = student.grades[testName];
+                    
+                    // 미응시한 시험은 건너뛰기
+                    if (!gradeData) continue;
+                    
+                    tableHtml += '<tr>';
+                    tableHtml += '<td class="test-name" style="font-size: 0.85em;">' + testName + '</td>';
                     var subjectTypeClass2 = (gradeData.subjectType || '').replace(/\s/g, '_');
                     tableHtml += '<td class="source-cell" style="font-size: 0.8em;"><span class="subject-type ' + subjectTypeClass2 + '">' + (gradeData.subjectType || '-') + '</span></td>';
                     tableHtml += '<td class="grade-cell grade-' + gradeData.grade + '" style="font-size: 0.85em;">' + gradeData.grade + '</td>';
@@ -5586,15 +5482,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
                     }
                     
                     tableHtml += '<td class="source-cell" style="font-size: 0.85em;">' + (gradeData.source || '-') + '</td>';
-                } else {
-                    tableHtml += '<td class="absent-cell" style="font-size: 0.85em;">-</td>';
-                    tableHtml += '<td class="absent-cell" style="font-size: 0.85em;">미응시</td>';
-                    tableHtml += '<td class="absent-cell" style="font-size: 0.85em;">-</td>';
-                    for (var k = 0; k < 10; k++) {
-                        tableHtml += '<td class="absent-cell" style="font-size: 0.85em;">-</td>';
-                    }
-                    tableHtml += '<td class="absent-cell" style="font-size: 0.85em;">-</td>';
-                }
+               tableHtml += '<td class="source-cell" style="font-size: 0.85em;">' + (gradeData.source || '-') + '</td>';
                 
                 tableHtml += '</tr>';
             }
@@ -5642,15 +5530,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
                     cutInfo += '<div class="grade-summary-item"><div class="grade-summary-value" style="font-size: 0.9em; color: #667eea;">' + gradeData.subjectType + '</div><div class="grade-summary-label">선택과목</div></div>';
                 }
                 
-              if (gradeData.gradeCut) {
-                cutInfo += '<div class="grade-summary-item"><div class="grade-summary-value" style="font-size: 1.1em;">' + gradeData.gradeCut + '점</div><div class="grade-summary-label" style="font-size: 0.75em;">내 등급컷</div></div>';
-            }
-            
-            if (gradeData.needScore !== null && gradeData.needScore !== undefined) {
-                var needScoreDisplay = gradeData.needScore > 0 ? '+' + gradeData.needScore : gradeData.needScore;
-                var needScoreColor = gradeData.needScore <= 0 ? '#2ecc71' : '#e74c3c';
-                cutInfo += '<div class="grade-summary-item"><div class="grade-summary-value" style="color: ' + needScoreColor + '; font-size: 1.1em;">' + needScoreDisplay + '점</div><div class="grade-summary-label" style="font-size: 0.75em;">한등급↑ 필요점수</div></div>';
-            }
+             
             
             var sourceInfo = '';
             if (gradeData.source && gradeData.source.trim() !== '') {
