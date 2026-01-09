@@ -5365,7 +5365,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '<thead><tr>';
             tableHtml += '<th class="test-name">시험</th>';
             tableHtml += '<th>선택과목</th>';
-            tableHtml += '<th>출처</th>';
+            tableHtml += '<th>점수</th>';      // ✅ 점수만 남김
             tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
@@ -5380,9 +5380,11 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 
                 var subjectTypeClass = (gradeData.subjectType || '').replace(/\s/g, '_');
                 tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
-                tableHtml += '<td class="grade-cell grade-' + gradeData.grade + '">' + gradeData.grade + '</td>';
+                // ❌ 등급 줄 삭제
                 tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
-                tableHtml += '<td class="source-cell">' + (gradeData.source || '-') + '</td>';
+                // ❌ 출처 줄 삭제
+                
+                tableHtml += '</tr>';
                 
                 tableHtml += '</tr>';
             }
@@ -5419,7 +5421,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
                     tableHtml += '<td class="test-name" style="font-size: 0.85em;">' + testName + '</td>';
                     var subjectTypeClass2 = (gradeData.subjectType || '').replace(/\s/g, '_');
                     tableHtml += '<td class="source-cell" style="font-size: 0.8em;"><span class="subject-type ' + subjectTypeClass2 + '">' + (gradeData.subjectType || '-') + '</span></td>';
-                    tableHtml += '<td class="grade-cell grade-' + gradeData.grade + '" style="font-size: 0.85em;">' + gradeData.grade + '</td>';
+                    // ❌ 등급 줄 삭제
                     tableHtml += '<td class="score-cell" style="font-size: 0.85em;">' + gradeData.score + '</td>';
                     
                     var subjectOrder = ['독서(인문,독서론)', '독서(사회)', '독서(과학)', 
@@ -5479,8 +5481,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
                         tableHtml += '<td style="color: ' + ratioColor + '; font-weight: bold; text-align: center; font-size: 0.85em;">' + ratioText + '</td>';
                     }
                     
-                    tableHtml += '<td class="source-cell" style="font-size: 0.85em;">' + (gradeData.source || '-') + '</td>';
-               tableHtml += '<td class="source-cell" style="font-size: 0.85em;">' + (gradeData.source || '-') + '</td>';
+                   
                 
                 tableHtml += '</tr>';
             }
