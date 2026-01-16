@@ -3082,7 +3082,7 @@ function getTargetScoreFromGrade(grade) {
         }
 
 // 최근 4회 평균 점수 계산
-var recent4Scores = scoreValues.slice(-4);
+var recent4Scores = scores.slice(-4);  // ✅ scores로 수정!
 var recent4Avg = recent4Scores.length > 0 
     ? Math.round(recent4Scores.reduce((a, b) => a + b) / recent4Scores.length) 
     : avgScore;
