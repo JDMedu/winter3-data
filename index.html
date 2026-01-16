@@ -2975,10 +2975,16 @@ function getTargetScoreFromGrade(grade) {
             `;
         }
 
-        // 선택과목별 백분위 계산 함수
-        function calculatePercentile(score, subjectType) {
-            // 언어와 매체 백분위 테이블
-            var languageMediaPercentiles = [
+       // 선택과목별 백분위 계산 함수
+function calculatePercentile(score, subjectType, testName) {
+    // 회차별 등급컷 조정 적용
+    var adjustedScore = testName ? adjustScoreByTestNumber(score, testName) : score;
+    
+    // 언어와 매체 백분위 테이블
+    var languageMediaPercentiles = [
+                {score: 100, percentile: 100},
+                {score: 95, percentile: 99},
+                {score: 90, percentile: 98},
                 {score: 85, percentile: 96},
                 {score: 78, percentile: 89},
                 {score: 69, percentile: 77},
@@ -2992,6 +2998,9 @@ function getTargetScoreFromGrade(grade) {
             
             // 화법과 작문 백분위 테이블
             var speechWritingPercentiles = [
+                 {score: 100, percentile: 100},
+                {score: 95, percentile: 99},
+                {score: 92, percentile: 98},
                 {score: 89, percentile: 96},
                 {score: 81, percentile: 89},
                 {score: 71, percentile: 77},
@@ -3012,16 +3021,16 @@ function getTargetScoreFromGrade(grade) {
                 percentileTable = speechWritingPercentiles;
             }
             
-            // 점수에 맞는 백분위 계산 (선형 보간)
+           // 점수에 맞는 백분위 계산 (선형 보간)
             for (var i = 0; i < percentileTable.length - 1; i++) {
                 var current = percentileTable[i];
                 var next = percentileTable[i + 1];
                 
-                if (score >= next.score && score <= current.score) {
+                if (adjustedScore >= next.score && adjustedScore <= current.score) {
                     // 선형 보간
                     var scoreRange = current.score - next.score;
                     var percentileRange = current.percentile - next.percentile;
-                    var scoreOffset = score - next.score;
+                    var scoreOffset = adjustedScore - next.score;
                     
                     var interpolatedPercentile = next.percentile + (scoreOffset / scoreRange) * percentileRange;
                     return Math.round(interpolatedPercentile);
@@ -3029,15 +3038,50 @@ function getTargetScoreFromGrade(grade) {
             }
             
             // 최고점 이상이면 최고 백분위
-            if (score >= percentileTable[0].score) {
+            if (adjustedScore >= percentileTable[0].score) {
                 return percentileTable[0].percentile;
             }
             
             // 최저점 이하이면 최저 백분위
             return percentileTable[percentileTable.length - 1].percentile;
         }
-        
-        // 📊 통계 계산 함수
+
+           // 백분위로 등급 계산 함수
+function getGradeFromPercentile(percentile) {
+    if (percentile >= 96) return 1;
+    if (percentile >= 89) return 2;
+    if (percentile >= 77) return 3;
+    if (percentile >= 61) return 4;
+    if (percentile >= 40) return 5;
+    if (percentile >= 23) return 6;
+    if (percentile >= 11) return 7;
+    if (percentile >= 4) return 8;
+    return 9;
+}
+
+// 시험 회차에 따른 등급컷 조정 함수
+function adjustScoreByTestNumber(score, testName) {
+    // 시험 이름에서 회차 추출 (예: "모클 10회" -> 10)
+    var match = testName.match(/(\d+)회/);
+    if (!match) return score;
+    
+    var testNumber = parseInt(match[1]);
+    
+    // 10회 단위로 등급컷 조정
+    var adjustment = 0;
+    if (testNumber >= 1 && testNumber <= 10) {
+        adjustment = 0;  // 1-10회: 조정 없음
+    } else if (testNumber >= 11 && testNumber <= 20) {
+        adjustment = 1;  // 11-20회: +1점 (85점 → 84점처럼 작용)
+    } else if (testNumber >= 21 && testNumber <= 30) {
+        adjustment = 2;  // 21-30회: +2점 (85점 → 83점처럼 작용)
+    }
+    
+    // 점수에 조정값 추가 (등급컷이 낮아지는 효과)
+    return score + adjustment;
+}
+
+// 📊 통계 계산 함수
         function calculateStatistics(student) {
             var grades = student.grades;
             var gradeKeys = Object.keys(grades);
@@ -3087,12 +3131,18 @@ var recent4Avg = recent4Scores.length > 0
     ? Math.round(recent4Scores.reduce((a, b) => a + b) / recent4Scores.length) 
     : avgScore;
 
-// 선택과목별 백분위 계산
-var percentile = calculatePercentile(recent4Avg, recentSubjectType);
+// 선택과목별 백분위 계산 (최근 시험 이름 사용)
+var recentTestName = recentTests.length > 0 ? recentTests[recentTests.length - 1] : '';
+var percentile = calculatePercentile(recent4Avg, recentSubjectType, recentTestName);
+
+            // 백분위 기반 평균 등급 계산
+var avgGradeFromPercentile = getGradeFromPercentile(percentile);
+            
             
             return {
                 avgScore: avgScore,
                 avgGrade: avgGrade,
+                avgGradeFromPercentile: avgGradeFromPercentile,
                 bestScore: bestScore,
                 bestGrade: bestGrade,
                 latestScore: latestScore,
@@ -3700,6 +3750,10 @@ document.addEventListener('click', function(e) {
                         <div class="stat-item">
                             <span class="stat-label">평균 점수</span>
                             <span class="stat-value">${stats.avgScore}점</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">평균 등급</span>
+                            <span class="stat-value grade-${stats.avgGradeFromPercentile}">${stats.avgGradeFromPercentile}등급</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">최고 성적</span>
@@ -5447,6 +5501,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '<th class="test-name">시험</th>';
             tableHtml += '<th>선택과목</th>';
             tableHtml += '<th>점수</th>';      // ✅ 점수만 남김
+            tableHtml += '<th>등급</th>';
             tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
@@ -5461,12 +5516,13 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 
                 var subjectTypeClass = (gradeData.subjectType || '').replace(/\s/g, '_');
                 tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
-                // ❌ 등급 줄 삭제
                 tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
-                // ❌ 출처 줄 삭제
                 
-                tableHtml += '</tr>';
-                
+               // 등급 계산 및 표시 (시험 이름 전달)
+            var testPercentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+            var testGrade = getGradeFromPercentile(testPercentile);
+                tableHtml += '<td class="grade-cell grade-' + testGrade + '">' + testGrade + '</td>';
+                                
                 tableHtml += '</tr>';
             }
             
@@ -5480,6 +5536,7 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">시험</th>';
             tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">선택과목</th>';
             tableHtml += '<th style="min-width: 50px; font-size: 0.85em;">점수</th>';
+            tableHtml += '<th style="min-width: 50px; font-size: 0.85em;">등급</th>';
             tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">독서(인문,독서론)</th>';
             tableHtml += '<th style="min-width: 60px; font-size: 0.85em;">독서(사회)</th>';
             tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">독서(과학)</th>';
@@ -5500,10 +5557,14 @@ document.getElementById('studyPlanSection').style.display = 'block';
                     
                     tableHtml += '<tr>';
                     tableHtml += '<td class="test-name" style="font-size: 0.85em;">' + testName + '</td>';
-                    var subjectTypeClass2 = (gradeData.subjectType || '').replace(/\s/g, '_');
-                    tableHtml += '<td class="source-cell" style="font-size: 0.8em;"><span class="subject-type ' + subjectTypeClass2 + '">' + (gradeData.subjectType || '-') + '</span></td>';
-                    // ❌ 등급 줄 삭제
+                   var subjectTypeClass2 = (gradeData.subjectType || '').replace(/\s/g, '_');
+                    tableHtml += '<td class="source-cell" style="font-size: 0.85em;"><span class="subject-type ' + subjectTypeClass2 + '">' + (gradeData.subjectType || '-') + '</span></td>';
                     tableHtml += '<td class="score-cell" style="font-size: 0.85em;">' + gradeData.score + '</td>';
+                    
+                    // 등급 계산 및 표시 (시험 이름 전달)
+                    var testPercentile2 = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+                    var testGrade2 = getGradeFromPercentile(testPercentile2);
+                    tableHtml += '<td class="grade-cell grade-' + testGrade2 + '" style="font-size: 0.85em;">' + testGrade2 + '</td>';
                     
                     var subjectOrder = ['독서(인문,독서론)', '독서(사회)', '독서(과학)', 
                                        '문학(현대시)', '문학(현대소설)', '문학(고전시가)', '문학(고전소설)',
