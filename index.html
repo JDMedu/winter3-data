@@ -2974,6 +2974,68 @@ function getTargetScoreFromGrade(grade) {
                 </div>
             `;
         }
+
+        // 선택과목별 백분위 계산 함수
+        function calculatePercentile(score, subjectType) {
+            // 언어와 매체 백분위 테이블
+            var languageMediaPercentiles = [
+                {score: 85, percentile: 96},
+                {score: 78, percentile: 89},
+                {score: 69, percentile: 77},
+                {score: 59, percentile: 61},
+                {score: 46, percentile: 40},
+                {score: 34, percentile: 23},
+                {score: 24, percentile: 11},
+                {score: 17, percentile: 4},
+                {score: 0, percentile: 0}
+            ];
+            
+            // 화법과 작문 백분위 테이블
+            var speechWritingPercentiles = [
+                {score: 89, percentile: 96},
+                {score: 81, percentile: 89},
+                {score: 71, percentile: 77},
+                {score: 61, percentile: 61},
+                {score: 47, percentile: 40},
+                {score: 36, percentile: 23},
+                {score: 26, percentile: 11},
+                {score: 17, percentile: 4},
+                {score: 0, percentile: 0}
+            ];
+            
+            // 선택과목에 따라 적절한 테이블 선택
+            var percentileTable;
+            if (subjectType && subjectType.includes('언어와')) {
+                percentileTable = languageMediaPercentiles;
+            } else {
+                // 화법과 작문 또는 미지정
+                percentileTable = speechWritingPercentiles;
+            }
+            
+            // 점수에 맞는 백분위 계산 (선형 보간)
+            for (var i = 0; i < percentileTable.length - 1; i++) {
+                var current = percentileTable[i];
+                var next = percentileTable[i + 1];
+                
+                if (score >= next.score && score <= current.score) {
+                    // 선형 보간
+                    var scoreRange = current.score - next.score;
+                    var percentileRange = current.percentile - next.percentile;
+                    var scoreOffset = score - next.score;
+                    
+                    var interpolatedPercentile = next.percentile + (scoreOffset / scoreRange) * percentileRange;
+                    return Math.round(interpolatedPercentile);
+                }
+            }
+            
+            // 최고점 이상이면 최고 백분위
+            if (score >= percentileTable[0].score) {
+                return percentileTable[0].percentile;
+            }
+            
+            // 최저점 이하이면 최저 백분위
+            return percentileTable[percentileTable.length - 1].percentile;
+        }
         
         // 📊 통계 계산 함수
         function calculateStatistics(student) {
@@ -3008,8 +3070,25 @@ function getTargetScoreFromGrade(grade) {
                 scoreChange = recent2[1] - recent2[0];
             }
             
-            // 상위 퍼센트 계산 (임의 계산)
-            var percentile = Math.max(1, Math.min(99, Math.round((100 - avgGrade * 10) + Math.random() * 10)));
+              // 최근 4회 선택과목 파악
+        var recentSubjectType = '';
+        var recentTests = gradeKeys.slice(-4);
+        for (var i = recentTests.length - 1; i >= 0; i--) {
+            var testName = recentTests[i];
+            if (grades[testName].subjectType) {
+                recentSubjectType = grades[testName].subjectType;
+                break;
+            }
+        }
+
+// 최근 4회 평균 점수 계산
+var recent4Scores = scoreValues.slice(-4);
+var recent4Avg = recent4Scores.length > 0 
+    ? Math.round(recent4Scores.reduce((a, b) => a + b) / recent4Scores.length) 
+    : avgScore;
+
+// 선택과목별 백분위 계산
+var percentile = calculatePercentile(recent4Avg, recentSubjectType);
             
             return {
                 avgScore: avgScore,
@@ -3630,10 +3709,12 @@ document.addEventListener('click', function(e) {
                             <span class="stat-label">최근 변화</span>
                             <span class="stat-value ${changeClass}">${changeIcon} ${changeText}점</span>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-label">예상 순위</span>
-                            <span class="stat-value">상위 ${stats.percentile}%</span>
-                        </div>
+                       <div class="stat-item">
+                        <span class="stat-label">예상 백분위</span>
+                        <span class="stat-value" style="color: ${stats.percentile >= 90 ? '#e74c3c' : stats.percentile >= 70 ? '#f39c12' : stats.percentile >= 50 ? '#2ecc71' : '#95a5a6'}">
+                            ${stats.percentile}%
+                        </span>
+                    </div>
                         <div class="stat-item">
                             <span class="stat-label">응시율</span>
                             <span class="stat-value">${Math.round(stats.testCount/stats.totalTests*100)}% (${stats.testCount}/${stats.totalTests}회)</span>
