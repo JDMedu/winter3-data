@@ -1651,6 +1651,112 @@
     height: 300px;
     margin: 20px 0;
 }
+
+        아! 찾으셨네요! 바로 그 위치입니다.
+
+.chart-container { 와 .progress-ring { 사이에 코멘트 CSS를 추가하시면 됩니다.
+
+정확한 위치:
+
+css
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 20px 0;
+}
+
+/* ⭐⭐⭐ 여기부터 코멘트 CSS 추가 ⭐⭐⭐ */
+/* 선생님 코멘트 스타일 */
+.teacher-comment-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 25px 0;
+    color: white;
+}
+
+.teacher-comment-section h3 {
+    margin-bottom: 15px;
+    font-size: 1.3em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.comment-display {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    line-height: 1.6;
+    min-height: 60px;
+    white-space: pre-wrap;
+}
+
+.comment-edit-area {
+    width: 100%;
+    min-height: 100px;
+    padding: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    font-size: 1em;
+    font-family: inherit;
+    resize: vertical;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+}
+
+.comment-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.comment-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.comment-btn-save {
+    background: #10b981;
+    color: white;
+}
+
+.comment-btn-save:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.comment-btn-edit {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+}
+
+.comment-btn-edit:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.comment-btn-cancel {
+    background: #ef4444;
+    color: white;
+}
+
+.comment-btn-cancel:hover {
+    background: #dc2626;
+}
+
+.comment-empty {
+    opacity: 0.7;
+    font-style: italic;
+}
+/* ⭐⭐⭐ 여기까지 추가 ⭐⭐⭐ */
+
         
         .progress-ring {
             display: flex;
@@ -4854,6 +4960,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                     if (isDataLoaded) {
                         updateDataStatus('✅ 성적 데이터가 준비되었습니다!', true, data.lastUpdated);
                         console.log('데이터 로드 성공!');
+                        loadCommentsFromGitHub();
                     } else {
                         updateDataStatus('업로드된 데이터가 비어있습니다. 관리자에게 문의하세요.');
                         console.log('데이터는 있지만 학생 정보가 없음');
@@ -5481,6 +5588,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                 '<div style="display: flex; justify-content: space-between;"><span style="font-weight: 600; color: #555;">응시 현황:</span><span style="color: #333; font-weight: bold;">' + attendedTests + '/' + totalTests + '회</span></div>' +
                 subjectTypeDisplay +
                 '</div></div>' +
+                displayTeacherComment(student.attendanceNumber) +  /* ⭐ 이 줄 추가 ⭐ */
                displayStudyFortune(student.name) +
                 displayDashboard(student);
             
@@ -5823,7 +5931,172 @@ document.getElementById('studyPlanSection').style.display = 'block';
             updateStudentTab();
         };
 
+ /* ⭐ 여기부터 추가 ⭐ */
+        
+        // 선생님 코멘트 관련 함수들
+        var studentComments = {}; // 코멘트 저장 객체
 
+        // GitHub에서 코멘트 데이터 로드
+        function loadCommentsFromGitHub() {
+            if (!dataUrl) return;
+            
+            var commentUrl = dataUrl.replace('winter3-data.json', 'winter3-comments.json');
+            
+            fetch(commentUrl + '?t=' + Date.now())
+                .then(function(response) {
+                    if (!response.ok) {
+                        console.log('코멘트 파일 없음 (첫 사용)');
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data) {
+                        studentComments = data.comments || {};
+                        console.log('코멘트 로드 완료:', Object.keys(studentComments).length + '개');
+                    }
+                })
+                .catch(function(error) {
+                    console.log('코멘트 로드 실패:', error);
+                });
+        }
+
+        // GitHub에 코멘트 저장
+        function saveCommentsToGitHub() {
+            if (!githubConfig.username || !githubConfig.repo) {
+                alert('GitHub 설정이 필요합니다.');
+                return Promise.reject('No GitHub config');
+            }
+            
+            var apiUrl = 'https://api.github.com/repos/' + githubConfig.username + '/' + githubConfig.repo + '/contents/winter3-comments.json';
+            
+            return fetch(apiUrl)
+                .then(function(response) {
+                    if (response.ok) return response.json();
+                    return null;
+                })
+                .then(function(existingFile) {
+                    var commentData = {
+                        comments: studentComments,
+                        lastUpdated: new Date().toISOString()
+                    };
+                    
+                    var requestBody = {
+                        message: '선생님 코멘트 업데이트 - ' + new Date().toLocaleString('ko-KR'),
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(commentData, null, 2))))
+                    };
+                    
+                    if (existingFile && existingFile.sha) {
+                        requestBody.sha = existingFile.sha;
+                    }
+                    
+                    var headers = {
+                        'Content-Type': 'application/json'
+                    };
+                    
+                    if (githubConfig.token) {
+                        headers['Authorization'] = 'token ' + githubConfig.token;
+                    }
+                    
+                    return fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: headers,
+                        body: JSON.stringify(requestBody)
+                    });
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('저장 실패 (' + response.status + ')');
+                    }
+                    return response.json();
+                });
+        }
+
+        // 코멘트 섹션 표시
+        function displayTeacherComment(attendanceNumber) {
+            var comment = studentComments[attendanceNumber] || '';
+            var isEditing = false;
+            
+            var html = '<div class="teacher-comment-section" id="commentSection">';
+            html += '<h3>💬 선생님 코멘트</h3>';
+            
+            html += '<div id="commentDisplay" class="comment-display">';
+            if (comment) {
+                html += comment;
+            } else {
+                html += '<span class="comment-empty">아직 작성된 코멘트가 없습니다.</span>';
+            }
+            html += '</div>';
+            
+            html += '<div id="commentEditArea" style="display: none;">';
+            html += '<textarea class="comment-edit-area" id="commentTextarea">' + comment + '</textarea>';
+            html += '<div class="comment-buttons">';
+            html += '<button class="comment-btn comment-btn-save" onclick="saveComment(\'' + attendanceNumber + '\')">💾 저장</button>';
+            html += '<button class="comment-btn comment-btn-cancel" onclick="cancelEditComment()">✖️ 취소</button>';
+            html += '</div>';
+            html += '</div>';
+            
+            html += '<div class="comment-buttons" id="commentEditButton">';
+            html += '<button class="comment-btn comment-btn-edit" onclick="editComment()">✏️ ' + (comment ? '수정하기' : '작성하기') + '</button>';
+            html += '</div>';
+            
+            html += '</div>';
+            
+            return html;
+        }
+
+        // 코멘트 수정 모드
+        function editComment() {
+            document.getElementById('commentDisplay').style.display = 'none';
+            document.getElementById('commentEditButton').style.display = 'none';
+            document.getElementById('commentEditArea').style.display = 'block';
+            document.getElementById('commentTextarea').focus();
+        }
+
+        // 코멘트 취소
+        function cancelEditComment() {
+            document.getElementById('commentDisplay').style.display = 'block';
+            document.getElementById('commentEditButton').style.display = 'flex';
+            document.getElementById('commentEditArea').style.display = 'none';
+        }
+
+        // 코멘트 저장
+        function saveComment(attendanceNumber) {
+            var textarea = document.getElementById('commentTextarea');
+            var newComment = textarea.value.trim();
+            
+            studentComments[attendanceNumber] = newComment;
+            
+            // GitHub에 저장
+            var saveBtn = event.target;
+            saveBtn.disabled = true;
+            saveBtn.textContent = '저장 중...';
+            
+            saveCommentsToGitHub()
+                .then(function() {
+                    alert('✅ 코멘트가 저장되었습니다!');
+                    
+                    // 화면 업데이트
+                    var displayDiv = document.getElementById('commentDisplay');
+                    if (newComment) {
+                        displayDiv.innerHTML = newComment;
+                    } else {
+                        displayDiv.innerHTML = '<span class="comment-empty">아직 작성된 코멘트가 없습니다.</span>';
+                    }
+                    
+                    var editButton = document.getElementById('commentEditButton').querySelector('.comment-btn-edit');
+                    editButton.textContent = '✏️ ' + (newComment ? '수정하기' : '작성하기');
+                    
+                    cancelEditComment();
+                })
+                .catch(function(error) {
+                    alert('❌ 저장 실패: ' + error.message);
+                })
+                .finally(function() {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '💾 저장';
+                });
+        }
         
     </script>
 </body>
