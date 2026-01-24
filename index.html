@@ -5752,6 +5752,13 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 var gradeData = grades[testName];
                 var gradeCard = document.createElement('div');
                 gradeCard.className = 'grade-card';
+
+                 // 등급이 null인 경우 다시 계산
+                var displayGrade = gradeData.grade;
+                if (!displayGrade || displayGrade === null || displayGrade === 'null') {
+                    var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+                    displayGrade = getGradeFromPercentile(percentile);
+                }
                 
                 var detailsHtml = '';
                 if (gradeData.details) {
@@ -5786,10 +5793,17 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 sourceInfo = '<div class="grade-summary-item"><div class="grade-summary-value" style="font-size: 0.8em; color: #666;">' + gradeData.source + '</div><div class="grade-summary-label" style="font-size: 0.75em;">출처</div></div>';
             }
                 
-                gradeCard.innerHTML = 
+               // ⭐ 등급 계산 추가 ⭐
+                var displayGrade = gradeData.grade;
+                if (!displayGrade || displayGrade === null) {
+                    var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+                    displayGrade = getGradeFromPercentile(percentile);
+                }
+                
+               gradeCard.innerHTML = 
                 '<h3 style="font-size: 1.1em; margin-bottom: 12px;">📝 ' + testName + '</h3>' +
                 '<div class="grade-summary" style="grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-bottom: 12px; padding: 10px;">' +
-                '<div class="grade-summary-item"><div class="grade-summary-value grade-' + gradeData.grade + '" style="font-size: 1.1em;">' + gradeData.grade + '등급</div><div class="grade-summary-label" style="font-size: 0.75em;">내 등급</div></div>' +
+                '<div class="grade-summary-item"><div class="grade-summary-value grade-' + displayGrade + '" style="font-size: 1.1em;">' + displayGrade + '등급</div><div class="grade-summary-label" style="font-size: 0.75em;">내 등급</div></div>' +
                 '<div class="grade-summary-item"><div class="grade-summary-value" style="font-size: 1.1em;">' + gradeData.score + '점</div><div class="grade-summary-label" style="font-size: 0.75em;">내 점수</div></div>' +
                 cutInfo + sourceInfo + '</div>' +
                 (detailsHtml ? '<div style="margin: 10px 0; padding: 8px; background: #f8f9fa; border-radius: 6px;"><h4 style="margin-bottom: 8px; color: #333; font-size: 0.85em;">📊 과목별 성취도 (점수 및 비율)</h4><div class="grade-details" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px;">' + detailsHtml + '</div></div>' : '');
