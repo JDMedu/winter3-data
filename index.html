@@ -3738,11 +3738,14 @@ function addBadgeTooltipEvents() {
             }
         }
         
-        collectTextNodes(badge);
+       collectTextNodes(badge);
         badgeText = textNodes.join(' ')
             .replace('NEW!', '')
             .replace(/\s+/g, ' ')
             .trim();
+        
+        // ⭐ 이모지 제거 추가 ⭐
+        badgeText = badgeText.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
         
         console.log('뱃지 설정:', index, '"' + badgeText + '"');
         
