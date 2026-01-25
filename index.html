@@ -1056,7 +1056,7 @@
         
         .badge-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));  /* ⭐ 140px → 180px ⭐ */
+    grid-template-columns: repeat(2, 1fr);  /* ⭐ 무조건 2열로 고정 ⭐ */
     gap: 8px;
     margin: 15px 0;
 }
@@ -1066,31 +1066,38 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 8px 12px;  /* ⭐ 10px → 12px ⭐ */
+    padding: 10px 12px;  /* ⭐ 8px → 10px ⭐ */
     border-radius: 20px;
-    font-size: 0.85em;
+    font-size: 0.8em;  /* ⭐ 0.85em → 0.8em (조금 작게) ⭐ */
     font-weight: bold;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     text-align: center;
-    min-height: 40px;  /* ⭐ 36px → 40px ⭐ */
+    min-height: 44px;  /* ⭐ 40px → 44px ⭐ */
     color: white;
-    word-break: keep-all;  /* ⭐ 추가: 단어 단위로 줄바꿈 ⭐ */
-    white-space: normal;   /* ⭐ 추가: 줄바꿈 허용 ⭐ */
-    line-height: 1.3;      /* ⭐ 추가: 줄간격 ⭐ */
+    word-wrap: break-word;  /* ⭐ word-break 대신 사용 ⭐ */
+    white-space: normal;
+    line-height: 1.4;  /* ⭐ 1.3 → 1.4 ⭐ */
+    overflow: visible;  /* ⭐ 추가 ⭐ */
 }
         
-        /* 뱃지 타입별 색상 */
-        .achievement-badge.grade { background: linear-gradient(45deg, #ffd700, #ff8c00); }
-        .achievement-badge.score { background: linear-gradient(45deg, #667eea, #764ba2); }
-        .achievement-badge.trend { background: linear-gradient(45deg, #ff6b6b, #feca57); }
-        .achievement-badge.improvement { background: linear-gradient(45deg, #10b981, #059669); }
-        .achievement-badge.attendance { background: linear-gradient(45deg, #8b5cf6, #7c3aed); }
-        .achievement-badge.special { background: linear-gradient(45deg, #f59e0b, #d97706); }
-        .achievement-badge.stability { background: linear-gradient(45deg, #06b6d4, #0891b2); }
-        .achievement-badge.rank { background: linear-gradient(45deg, #ef4444, #dc2626); }
-        .achievement-badge.recovery { background: linear-gradient(45deg, #84cc16, #65a30d); }
-        .achievement-badge.start { background: linear-gradient(45deg, #ec4899, #db2777); }
-        .achievement-badge.milestone { background: linear-gradient(45deg, #f97316, #ea580c); }
+      /* 뱃지 타입별 색상 */
+.achievement-badge.grade { background: linear-gradient(45deg, #ffd700, #ff8c00); }
+.achievement-badge.score { background: linear-gradient(45deg, #667eea, #764ba2); }
+.achievement-badge.trend { background: linear-gradient(45deg, #ff6b6b, #feca57); }
+.achievement-badge.improvement { background: linear-gradient(45deg, #10b981, #059669); }
+.achievement-badge.attendance { background: linear-gradient(45deg, #8b5cf6, #7c3aed); }
+.achievement-badge.special { background: linear-gradient(45deg, #f59e0b, #d97706); }
+.achievement-badge.stability { background: linear-gradient(45deg, #06b6d4, #0891b2); }
+.achievement-badge.rank { background: linear-gradient(45deg, #ef4444, #dc2626); }
+.achievement-badge.recovery { background: linear-gradient(45deg, #84cc16, #65a30d); }
+.achievement-badge.start { background: linear-gradient(45deg, #ec4899, #db2777); }
+.achievement-badge.milestone { background: linear-gradient(45deg, #f97316, #ea580c); }
+
+/* ⭐⭐⭐ 여기부터 추가 ⭐⭐⭐ */
+.achievement-badge.subject-master { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+.achievement-badge.single-jump { background: linear-gradient(45deg, #16a085, #2ecc71); }
+.achievement-badge.total-growth { background: linear-gradient(45deg, #27ae60, #2ecc71); }
+/* ⭐⭐⭐ 여기까지 추가 ⭐⭐⭐ */
         
         .badge-new {
             animation: pulse-badge 2s infinite;
@@ -3641,13 +3648,15 @@ var tooltipTimeout = null;
 // 뱃지 툴팁 표시 함수
 function showBadgeTooltip(event, badgeText) {
     console.log('툴팁 표시 시도:', badgeText);
+    console.log('실제 키 목록:', Object.keys(badgeDescriptions));  /* ⭐ 추가 ⭐ */
     
     // 기존 툴팁 제거
     hideBadgeTooltip();
     
     var description = badgeDescriptions[badgeText];
     if (!description) {
-        console.log('설명을 찾을 수 없음:', badgeText);
+        console.log('설명을 찾을 수 없음:', '"' + badgeText + '"');  /* ⭐ 따옴표 추가 ⭐ */
+        console.log('키 길이:', badgeText.length);  /* ⭐ 추가 ⭐ */
         return;
     }
     
