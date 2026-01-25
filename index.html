@@ -1827,20 +1827,27 @@ css
 
 /* 뱃지 설명 툴팁 스타일 */
 .badge-tooltip {
-    position: fixed;                    /* absolute → fixed 변경 */
-    background: rgba(0, 0, 0, 0.95);   /* 0.9 → 0.95 변경 (더 진하게) */
+    position: fixed;
+    background: rgba(0, 0, 0, 0.95);
     color: white;
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 0.85em;
     max-width: 250px;
-    z-index: 99999;                    /* 1000 → 99999 변경 */
+    z-index: 999999;  /* ⭐ 99999 → 999999 ⭐ */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     pointer-events: none;
     opacity: 0;
     transform: translateY(10px);
     transition: all 0.3s ease;
     line-height: 1.4;
+    display: block !important;  /* ⭐ 추가 ⭐ */
+}
+
+.badge-tooltip.visible {
+    opacity: 1 !important;  /* ⭐ !important 추가 ⭐ */
+    transform: translateY(0) !important;  /* ⭐ !important 추가 ⭐ */
+    display: block !important;  /* ⭐ 추가 ⭐ */
 }
 
 .badge-tooltip.visible {
@@ -3674,10 +3681,13 @@ function showBadgeTooltip(event, badgeText) {
     
 
     // 간단한 위치 설정
+   // 간단한 위치 설정
     var rect = event.target.getBoundingClientRect();
     tooltip.style.left = (rect.left + rect.width / 2) + 'px';
     tooltip.style.top = (rect.top - 10) + 'px';
     tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+    tooltip.style.display = 'block';  /* ⭐ 추가 ⭐ */
+    tooltip.style.visibility = 'visible';  /* ⭐ 추가 ⭐ */
     
     // 애니메이션으로 표시
     requestAnimationFrame(function() {
