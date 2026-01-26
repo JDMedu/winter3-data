@@ -3206,14 +3206,15 @@ function adjustScoreByTestNumber(score, testName) {
 
 // 📊 통계 계산 함수
         function calculateStatistics(student) {
-            var grades = student.grades;
-            var gradeKeys = Object.keys(grades);
-            
-            if (gradeKeys.length === 0) return null;
-            
-            var scores = [];
-            var gradeValues = [];
-            var recentScores = [];
+    var grades = student.grades;
+    var gradeKeys = Object.keys(grades);
+    
+    if (gradeKeys.length === 0) return null;
+    
+    var scores = [];
+    var gradeValues = [];
+    var scoreValues = [];  /* ⭐ 추가 ⭐ */
+    var recentScores = [];
             
             gradeKeys.forEach(function(testName) {
                 var gradeData = grades[testName];
