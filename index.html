@@ -3217,8 +3217,16 @@ function adjustScoreByTestNumber(score, testName) {
             
             gradeKeys.forEach(function(testName) {
                 var gradeData = grades[testName];
-                if (gradeData.score) scores.push(parseInt(gradeData.score));
-                if (gradeData.grade) gradeValues.push(parseInt(gradeData.grade));
+                
+                // ⭐ 등급 계산 추가 ⭐
+                var finalGrade = gradeData.grade;
+                if (!finalGrade || finalGrade === null || finalGrade === 'null') {
+                    var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+                    finalGrade = getGradeFromPercentile(percentile);
+                }
+                
+                if (finalGrade) gradeValues.push(parseInt(finalGrade));
+                if (gradeData.score) scoreValues.push(parseInt(gradeData.score));
             });
             
             // 최근 3회 점수
@@ -4259,17 +4267,24 @@ setTimeout(function() {
             
             // 최근 4회 시험 데이터 추출
             var recentTests = gradeKeys.slice(-4);
-            var recentData = [];
+           var recentData = [];
             
             recentTests.forEach(function(testName) {
                 var gradeData = student.grades[testName];
                 if (gradeData) {
+                    // ⭐ 등급이 null이면 계산 ⭐
+                    var finalGrade = gradeData.grade;
+                    if (!finalGrade || finalGrade === null || finalGrade === 'null') {
+                        var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+                        finalGrade = getGradeFromPercentile(percentile);
+                    }
+                    
                     recentData.push({
-                    name: testName,
-                    grade: parseInt(gradeData.grade),
-                    score: parseInt(gradeData.score),
-                    subjectType: gradeData.subjectType || ''
-                });
+                        name: testName,
+                        grade: parseInt(finalGrade),
+                        score: parseInt(gradeData.score),
+                        subjectType: gradeData.subjectType || ''
+                    });
                 }
             });
             
