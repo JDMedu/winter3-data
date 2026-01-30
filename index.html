@@ -5477,16 +5477,18 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                     var attendanceNumber = row[1].toString().trim();
                     var subjectType = row[2] ? row[2].toString().trim() : '';
                     
-                    if (attendanceNumber === '2274' || attendanceNumber === '2284') {
-                        console.log('만점 학생 발견:', attendanceNumber, subjectType);
-                        
-                        var normalizedType = subjectType.replace(/\s/g, '');
-                        if (normalizedType.includes('언어') || normalizedType.includes('매체')) {
-                            perfectStudents['언어와매체'] = row;
-                        } else if (normalizedType.includes('화법') || normalizedType.includes('작문')) {
-                            perfectStudents['화법과작문'] = row;
-                        }
+              if (attendanceNumber === '2274' || attendanceNumber === '2284') {
+                    console.log('만점 학생 발견:', sheetName, attendanceNumber, subjectType, '전체 행:', row);  /* ⭐ 디버깅 강화 ⭐ */
+                    
+                    var normalizedType = subjectType.replace(/\s/g, '');
+                    if (normalizedType.includes('언어') || normalizedType.includes('매체')) {
+                        perfectStudents['언어와매체'] = row;
+                        console.log('언어와매체 만점 학생 저장:', row);  /* ⭐ 추가 ⭐ */
+                    } else if (normalizedType.includes('화법') || normalizedType.includes('작문')) {
+                        perfectStudents['화법과작문'] = row;
+                        console.log('화법과작문 만점 학생 저장:', row);  /* ⭐ 추가 ⭐ */
                     }
+                }
                 }
                 
                 // 2단계: 만점 학생이 있으면 그들의 점수를 만점으로 사용
