@@ -5328,46 +5328,60 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             maxScores = extractMaxScoreswinter3(workbook, testSheetNames);
             console.log('추출 완료된 maxScores:', maxScores);
             
-            // 6. 학생 데이터 처리 (이 부분은 기존 코드 그대로 이어짐)
-            console.log('=== 학생 데이터 처리 시작 ===');
-           for (var s = 0; s < testSheetNames.length; s++) {
+           // 6. 학생 데이터 처리
+console.log('=== 학생 데이터 처리 시작 ===');
+for (var s = 0; s < testSheetNames.length; s++) {
     var sheetName = testSheetNames[s];
-                if (!workbook.Sheets[sheetName]) continue;
-                
-                console.log('처리 중인 시트:', sheetName);
-                
-                var worksheet = workbook.Sheets[sheetName];
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
-                
-                if (jsonData.length <= 1) continue;
-                
-                var headers = jsonData[0];
-                var sheetMaxScores = maxScores[sheetName] || {};
-                
-                console.log(sheetName + ' 헤더:', headers);
-                console.log(sheetName + ' 첫 번째 데이터 행:', jsonData[1]);
+    if (!workbook.Sheets[sheetName]) continue;
+    
+    console.log('처리 중인 시트:', sheetName);
+    
+    var worksheet = workbook.Sheets[sheetName];
+    var jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+    
+    if (jsonData.length <= 1) continue;
+    
+    var headers = jsonData[0];
+    
+    console.log(sheetName + ' 헤더:', headers);
+    console.log(sheetName + ' 첫 번째 데이터 행:', jsonData[1]);
 
-                for (var i = 1; i < jsonData.length; i++) {
+    // ⭐ source 변수 선언 추가! ⭐
+    var source = '';
+    if (window.testSources && window.testSources[sheetName]) {
+        source = window.testSources[sheetName];
+    }
+    console.log('시험:', sheetName, '출처:', source);
+
+    for (var i = 1; i < jsonData.length; i++) {
         var row = jsonData[i];
+        if (!row || !row[0]) continue;
+        
         var name = row[0];
+        if (!studentsByName[name]) continue;
+        
+        var attendanceNumber = row[1];
         var subjectTypeFromSheet = row[2]; // 선택과목
         var gradeFromSheet = row[3];
-        var scoreFromSheet = row[4]; // ⭐ 점수 (E열)
-                    
-       // ⭐ 선택과목에 따라 적절한 만점 선택 ⭐
-var track = getTrack(subjectTypeFromSheet);  // '언어와매체' 또는 '화법과작문'
-var sheetMaxScores =
-  (maxScores[sheetName] && maxScores[sheetName][track])
-    ? maxScores[sheetName][track]
-    : {};
-
-// 과목별 점수 수집
-var details = {};
-var ratios = {};
-
+        var scoreFromSheet = row[4];
+        
+        console.log('\n=== 학생 처리:', name, '(' + attendanceNumber + ') ===');
+        console.log('선택과목:', subjectTypeFromSheet);
+        console.log('등급:', gradeFromSheet);
+        console.log('점수:', scoreFromSheet);
+        
+        // ⭐ 선택과목에 따라 적절한 만점 선택 ⭐
+        var track = getTrack(subjectTypeFromSheet);
+        var sheetMaxScores = (maxScores[sheetName] && maxScores[sheetName][track])
+            ? maxScores[sheetName][track]
+            : {};
+        
+        // 과목별 점수 수집
+        var details = {};
+        var ratios = {};
         
         for (var j = 5; j < Math.min(headers.length, row.length); j++) {
-            var subject = normHeader(headers[j]); // 공백 제거 통일
+            var subject = normHeader(headers[j]);
             var subjectScore = row[j];
             
             if (subject && subjectScore !== null && subjectScore !== undefined && subjectScore !== '') {
@@ -5379,29 +5393,26 @@ var ratios = {};
                 }
             }
         }
-                    
-                    // 1. 선택과목은 C열에서 직접 읽기
-                    var finalSubjectType = subjectTypeFromSheet || '화법과 작문';
-                    
-                    // 2. 등급은 D열에서 직접 읽기 (null이면 null 그대로)
-                    var finalGrade = null;
-                    if (gradeFromSheet && gradeFromSheet !== '' && gradeFromSheet !== null) {
-                        finalGrade = parseInt(gradeFromSheet);
-                    }
-                    
-                   
-                    
-                    studentsByName[name].grades[sheetName] = {
-                        grade: finalGrade,
-                        score: scoreFromSheet,
-                        subjectType: finalSubjectType,
-                        details: details,
-                        ratios: ratios,
-                        source: source
-                    };
-                }
-                
-            }
+        
+        // 1. 선택과목은 C열에서 직접 읽기
+        var finalSubjectType = subjectTypeFromSheet || '화법과 작문';
+        
+        // 2. 등급은 D열에서 직접 읽기 (null이면 null 그대로)
+        var finalGrade = null;
+        if (gradeFromSheet && gradeFromSheet !== '' && gradeFromSheet !== null) {
+            finalGrade = parseInt(gradeFromSheet);
+        }
+        
+        studentsByName[name].grades[sheetName] = {
+            grade: finalGrade,
+            score: scoreFromSheet,
+            subjectType: finalSubjectType,
+            details: details,
+            ratios: ratios,
+            source: source  // ⭐ 이제 정의됨! ⭐
+        };
+    }
+}
             
             // 7. 최종 데이터 구성
             studentByNumber = {};
