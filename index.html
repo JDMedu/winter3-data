@@ -5352,6 +5352,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         var name = row[0];
         var subjectTypeFromSheet = row[2]; // 선택과목
         var gradeFromSheet = row[3];
+        var scoreFromSheet = row[4]; // ⭐ 점수 (E열)
                     
        // ⭐ 선택과목에 따라 적절한 만점 선택 ⭐
 var track = getTrack(subjectTypeFromSheet);  // '언어와매체' 또는 '화법과작문'
