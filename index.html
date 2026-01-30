@@ -5275,7 +5275,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                 return testSources;
             }
             
-            // 3. 출결번호-이름 매핑 처리
+           // 3. 출결번호-이름 매핑 처리
             var mappingSheetName = workbook.SheetNames[1];
             if (workbook.Sheets[mappingSheetName]) {
                 var mappingSheet = workbook.Sheets[mappingSheetName];
@@ -5323,12 +5323,12 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             
             console.log('발견된 모클 시트들:', testSheetNames);
             
-           // 5. 만점 추출
-console.log('=== 고3 만점 추출 시작 ===');
-maxScores = extractMaxScoreswinter3(workbook, testSheetNames);  /* ⭐ 반환값 받기! ⭐ */
-console.log('추출 완료된 maxScores:', maxScores);
+            // ⭐⭐⭐ 5. 만점 추출 - 여기! ⭐⭐⭐
+            console.log('=== 고3 만점 추출 시작 ===');
+            maxScores = extractMaxScoreswinter3(workbook, testSheetNames);
+            console.log('추출 완료된 maxScores:', maxScores);
             
-            // 6. 학생 데이터 처리
+            // 6. 학생 데이터 처리 (이 부분은 기존 코드 그대로 이어짐)
             console.log('=== 학생 데이터 처리 시작 ===');
             for (var s = 0; s < testSheetNames.length; s++) {
                 var sheetName = testSheetNames[s];
