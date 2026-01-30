@@ -5443,130 +5443,73 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                 console.log('첫 번째 학생 데이터 확인:', studentByNumber[firstStudentKey]);
             }
         }
-
-        function extractMaxScoreswinter3(workbook, testSheetNames) {
-            console.log('고3 각 시트에서 직접 만점 추출 시작...');
+        
+function extractMaxScoreswinter3(workbook, testSheetNames) {
+    console.log('🔥 만점 추출 시작');
+    var result = {};
+    
+    testSheetNames.forEach(function(sheetName) {
+        var sheet = workbook.Sheets[sheetName];
+        if (!sheet) return;
+        
+        var data = XLSX.utils.sheet_to_json(sheet, {header: 1});
+        var headers = data[0];
+        
+        // 이대건(2274), 오진형(2284) 찾기
+        var 이대건 = null;
+        var 오진형 = null;
+        
+        for (var i = 1; i < data.length; i++) {
+            var row = data[i];
+            var attendanceNumber = String(row[1]).trim();
             
-            maxScores = {};
-            
-            for (var i = 0; i < testSheetNames.length; i++) {
-                var sheetName = testSheetNames[i];
-                if (!workbook.Sheets[sheetName]) continue;
-                
-                var worksheet = workbook.Sheets[sheetName];
-                var sheetData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
-                
-                if (sheetData.length <= 1) continue;
-                
-                var headers = sheetData[0];
-                console.log(sheetName + ' 헤더:', headers);
-                
-                maxScores[sheetName] = {};
-                
-                // ⭐ 만점 학생 찾기 (2274 이대건 = 언어와 매체, 2284 오진형 = 화법과 작문) ⭐
-                var perfectStudents = {
-                    '언어와매체': null,
-                    '화법과작문': null
-                };
-                
-                // 1단계: 만점 학생 2명 찾기
-                for (var rowIndex = 1; rowIndex < sheetData.length; rowIndex++) {
-                    var row = sheetData[rowIndex];
-                    if (!row || !row[1]) continue;
-                    
-                    var attendanceNumber = row[1].toString().trim();
-                    var subjectType = row[2] ? row[2].toString().trim() : '';
-                    
-              if (attendanceNumber === '2274' || attendanceNumber === '2284') {
-                    console.log('만점 학생 발견:', sheetName, attendanceNumber, subjectType, '전체 행:', row);  /* ⭐ 디버깅 강화 ⭐ */
-                    
-                    var normalizedType = subjectType.replace(/\s/g, '');
-                    if (normalizedType.includes('언어') || normalizedType.includes('매체')) {
-                        perfectStudents['언어와매체'] = row;
-                        console.log('언어와매체 만점 학생 저장:', row);  /* ⭐ 추가 ⭐ */
-                    } else if (normalizedType.includes('화법') || normalizedType.includes('작문')) {
-                        perfectStudents['화법과작문'] = row;
-                        console.log('화법과작문 만점 학생 저장:', row);  /* ⭐ 추가 ⭐ */
-                    }
-                }
-                }
-                
-                // 2단계: 만점 학생이 있으면 그들의 점수를 만점으로 사용
-                if (perfectStudents['언어와매체'] || perfectStudents['화법과작문']) {
-                    console.log('만점 학생 기준으로 만점 계산');
-                    
-                    for (var colIndex = 5; colIndex < headers.length; colIndex++) {
-                        var subject = headers[colIndex];
-                        if (!subject) continue;
-                        
-                        var normalizedSubject = subject.replace(/\s/g, '');
-                        var maxScore = 0;
-                        
-                        // 과목명에 따라 적절한 만점 학생 선택
-                        var referenceStudent = null;
-                        
-                        if (normalizedSubject.includes('언어') || normalizedSubject.includes('매체')) {
-                            referenceStudent = perfectStudents['언어와매체'];
-                        } else if (normalizedSubject.includes('화법') || normalizedSubject.includes('작문')) {
-                            referenceStudent = perfectStudents['화법과작문'];
-                        } else {
-                            // 독서, 문학은 둘 중 아무나
-                            referenceStudent = perfectStudents['언어와매체'] || perfectStudents['화법과작문'];
-                        }
-                        
-                        if (referenceStudent && referenceStudent[colIndex]) {
-                            maxScore = parseFloat(referenceStudent[colIndex]);
-                        }
-                        
-                        // 만점 학생이 없거나 점수가 0이면 전체에서 최고점 사용
-                        if (maxScore === 0) {
-                            for (var rowIndex = 1; rowIndex < sheetData.length; rowIndex++) {
-                                var row = sheetData[rowIndex];
-                                if (row && row[colIndex]) {
-                                    var score = parseFloat(row[colIndex]);
-                                    if (!isNaN(score)) {
-                                        maxScore = Math.max(maxScore, score);
-                                    }
-                                }
-                            }
-                        }
-                        
-                        if (maxScore > 0) {
-                            maxScores[sheetName][subject] = maxScore;
-                            console.log('만점 설정:', sheetName, subject, '=', maxScore + '점');
-                        }
-                    }
-                } else {
-                    // 만점 학생이 없으면 기존 방식대로
-                    console.log('만점 학생 없음, 기존 방식 사용');
-                    
-                    for (var colIndex = 5; colIndex < headers.length; colIndex++) {
-                        var subject = headers[colIndex];
-                        if (!subject) continue;
-                        
-                        var maxScore = 0;
-                        
-                        for (var rowIndex = 1; rowIndex < sheetData.length; rowIndex++) {
-                            var row = sheetData[rowIndex];
-                            if (row && row[colIndex]) {
-                                var score = parseFloat(row[colIndex]);
-                                if (!isNaN(score)) {
-                                    maxScore = Math.max(maxScore, score);
-                                }
-                            }
-                        }
-                        
-                        if (maxScore > 0) {
-                            maxScores[sheetName][subject] = maxScore;
-                        }
-                    }
-                }
-                
-                console.log(sheetName + ' 최종 만점:', maxScores[sheetName]);
+            if (attendanceNumber === '2274') {
+                이대건 = row;
+                console.log('✅ 이대건 발견:', sheetName);
+            }
+            if (attendanceNumber === '2284') {
+                오진형 = row;
+                console.log('✅ 오진형 발견:', sheetName);
             }
             
-            console.log('고3 모든 시트 만점 추출 완료:', maxScores);
+            if (이대건 && 오진형) break;
         }
+        
+        if (!이대건 || !오진형) {
+            console.warn('⚠️ 만점 학생 없음:', sheetName);
+            return;
+        }
+        
+        // 만점 설정
+        var maxScores = {};
+        
+        for (var col = 0; col < headers.length; col++) {
+            var header = String(headers[col]).trim();
+            var 이대건점수 = parseFloat(이대건[col]) || 0;
+            var 오진형점수 = parseFloat(오진형[col]) || 0;
+            
+            // 독서, 문학은 둘 다 동일하므로 아무나
+            if (header.includes('독서') || header.includes('문학')) {
+                maxScores[header] = Math.max(이대건점수, 오진형점수);
+            }
+            // 언어, 매체 → 이대건
+            else if (header.includes('언어') || header.includes('매체')) {
+                maxScores[header] = 이대건점수;
+            }
+            // 화법, 작문 → 오진형
+            else if (header.includes('화법') || header.includes('작문')) {
+                maxScores[header] = 오진형점수;
+            }
+        }
+        
+        console.log('✅ ' + sheetName + ' 만점:', maxScores);
+        result[sheetName] = maxScores;
+    });
+    
+    console.log('=== 최종 만점 결과 ===', result);
+    return result;
+}
+            
         
         function showProgress(show) {
             document.getElementById('progressContainer').style.display = show ? 'block' : 'none';
