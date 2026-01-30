@@ -5450,6 +5450,8 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
         // 이대건(2274), 오진형(2284) 찾기
         var 이대건 = null;
         var 오진형 = null;
+        var 이대건선택과목 = '';
+        var 오진형선택과목 = '';
         
         for (var i = 1; i < data.length; i++) {
             var row = data[i];
@@ -5457,11 +5459,13 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
             
             if (attendanceNumber === '2274') {
                 이대건 = row;
-                console.log('✅ 이대건 발견:', sheetName);
+                이대건선택과목 = String(row[2] || '').trim();  /* ⭐ C열에서 선택과목 읽기 ⭐ */
+                console.log('✅ 이대건 발견:', sheetName, '선택과목:', 이대건선택과목);
             }
             if (attendanceNumber === '2284') {
                 오진형 = row;
-                console.log('✅ 오진형 발견:', sheetName);
+                오진형선택과목 = String(row[2] || '').trim();  /* ⭐ C열에서 선택과목 읽기 ⭐ */
+                console.log('✅ 오진형 발견:', sheetName, '선택과목:', 오진형선택과목);
             }
             
             if (이대건 && 오진형) break;
@@ -5480,17 +5484,26 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
             var 이대건점수 = parseFloat(이대건[col]) || 0;
             var 오진형점수 = parseFloat(오진형[col]) || 0;
             
+            // ⭐⭐⭐ 핵심 수정 부분 ⭐⭐⭐
+            
             // 독서, 문학은 둘 다 동일하므로 아무나
             if (header.includes('독서') || header.includes('문학')) {
                 maxScores[header] = Math.max(이대건점수, 오진형점수);
             }
-            // 언어, 매체 → 이대건
+            // 언어, 매체 → 무조건 이대건
             else if (header.includes('언어') || header.includes('매체')) {
                 maxScores[header] = 이대건점수;
+                console.log('  → 언어/매체:', header, '=', 이대건점수, '(이대건)');
             }
-            // 화법, 작문 → 오진형
-            else if (header.includes('화법') || header.includes('작문')) {
+            // 화법 → 오진형 (화법과 작문 학생)
+            else if (header.includes('화법')) {
                 maxScores[header] = 오진형점수;
+                console.log('  → 화법:', header, '=', 오진형점수, '(오진형)');
+            }
+            // 작문 → 오진형 (화법과 작문 학생)
+            else if (header.includes('작문')) {
+                maxScores[header] = 오진형점수;
+                console.log('  → 작문:', header, '=', 오진형점수, '(오진형)');
             }
         }
         
