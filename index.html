@@ -5323,10 +5323,10 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             
             console.log('발견된 모클 시트들:', testSheetNames);
             
-            // 5. 만점 추출
-            console.log('=== 고3 만점 추출 시작 ===');
-            extractMaxScoreswinter3(workbook, testSheetNames);
-            console.log('추출 완료된 maxScores:', maxScores);
+           // 5. 만점 추출
+console.log('=== 고3 만점 추출 시작 ===');
+maxScores = extractMaxScoreswinter3(workbook, testSheetNames);  /* ⭐ 반환값 받기! ⭐ */
+console.log('추출 완료된 maxScores:', maxScores);
             
             // 6. 학생 데이터 처리
             console.log('=== 학생 데이터 처리 시작 ===');
@@ -5385,15 +5385,7 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                             var maxScore = sheetMaxScores[subject];
                             if (maxScore) {
                                 ratios[subject] = Math.round((subjectScore / maxScore) * 100);
-                            } else {
-                                // 화법과 작문 만점 추정
-                                if (subject.includes('화법') || subject.includes('작문')) {
-                                    var estimatedMax = 22;
-                                    if (sheetName === '모클4회' || sheetName === '모클5회') {
-                                        estimatedMax = 13;
-                                    }
-                                    ratios[subject] = Math.round((subjectScore / estimatedMax) * 100);
-                                }
+                           
                             }
                         }
                     }
