@@ -5450,8 +5450,6 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
         // 이대건(2274), 오진형(2284) 찾기
         var 이대건 = null;
         var 오진형 = null;
-        var 이대건선택과목 = '';
-        var 오진형선택과목 = '';
         
         for (var i = 1; i < data.length; i++) {
             var row = data[i];
@@ -5459,13 +5457,11 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
             
             if (attendanceNumber === '2274') {
                 이대건 = row;
-                이대건선택과목 = String(row[2] || '').trim();  /* ⭐ C열에서 선택과목 읽기 ⭐ */
-                console.log('✅ 이대건 발견:', sheetName, '선택과목:', 이대건선택과목);
+                console.log('✅ 이대건 발견:', sheetName);
             }
             if (attendanceNumber === '2284') {
                 오진형 = row;
-                오진형선택과목 = String(row[2] || '').trim();  /* ⭐ C열에서 선택과목 읽기 ⭐ */
-                console.log('✅ 오진형 발견:', sheetName, '선택과목:', 오진형선택과목);
+                console.log('✅ 오진형 발견:', sheetName);
             }
             
             if (이대건 && 오진형) break;
@@ -5476,7 +5472,7 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
             return;
         }
         
-        // 만점 설정
+        // 만점 설정 - 헤더명 그대로 사용!
         var maxScores = {};
         
         for (var col = 0; col < headers.length; col++) {
@@ -5484,26 +5480,22 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
             var 이대건점수 = parseFloat(이대건[col]) || 0;
             var 오진형점수 = parseFloat(오진형[col]) || 0;
             
-            // ⭐⭐⭐ 핵심 수정 부분 ⭐⭐⭐
-            
-            // 독서, 문학은 둘 다 동일하므로 아무나
-            if (header.includes('독서') || header.includes('문학')) {
-                maxScores[header] = Math.max(이대건점수, 오진형점수);
-            }
-            // 언어, 매체 → 무조건 이대건
-            else if (header.includes('언어') || header.includes('매체')) {
-                maxScores[header] = 이대건점수;
-                console.log('  → 언어/매체:', header, '=', 이대건점수, '(이대건)');
-            }
-            // 화법 → 오진형 (화법과 작문 학생)
-            else if (header.includes('화법')) {
-                maxScores[header] = 오진형점수;
-                console.log('  → 화법:', header, '=', 오진형점수, '(오진형)');
-            }
-            // 작문 → 오진형 (화법과 작문 학생)
-            else if (header.includes('작문')) {
-                maxScores[header] = 오진형점수;
-                console.log('  → 작문:', header, '=', 오진형점수, '(오진형)');
+            // 점수가 있는 과목만 처리
+            if (이대건점수 > 0 || 오진형점수 > 0) {
+                // 독서, 문학 → 둘 중 높은 점수
+                if (header.includes('독서') || header.includes('문학')) {
+                    maxScores[header] = Math.max(이대건점수, 오진형점수);
+                }
+                // "언어 화법" → 이대건 (언어와 매체 학생)
+                else if (header === '언어 화법') {
+                    maxScores[header] = 이대건점수;
+                    console.log('  → 언어 화법:', header, '=', 이대건점수, '(이대건)');
+                }
+                // "매체 작문" → 이대건 (언어와 매체 학생)
+                else if (header === '매체 작문') {
+                    maxScores[header] = 이대건점수;
+                    console.log('  → 매체 작문:', header, '=', 이대건점수, '(이대건)');
+                }
             }
         }
         
