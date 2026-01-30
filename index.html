@@ -6168,13 +6168,13 @@ document.getElementById('studyPlanSection').style.display = 'block';
             var html = '<div class="teacher-comment-section" id="commentSection">';
             html += '<h3>💬 선생님 코멘트</h3>';
             
-            html += '<div id="commentDisplay" class="comment-display">';
-            if (comment) {
-                html += comment;
-            } else {
-                html += '<span class="comment-empty">아직 작성된 코멘트가 없습니다.</span>';
-            }
-            html += '</div>';
+          html += '<div id="commentDisplay" class="comment-display" style="white-space: pre-wrap;">';  /* ⭐ 스타일 추가 ⭐ */
+if (comment) {
+    html += comment;
+} else {
+    html += '<span class="comment-empty">아직 작성된 코멘트가 없습니다.</span>';
+}
+html += '</div>';
             
             html += '<div id="commentEditArea" style="display: none;">';
             html += '<textarea class="comment-edit-area" id="commentTextarea">' + comment + '</textarea>';
@@ -6225,9 +6225,9 @@ document.getElementById('studyPlanSection').style.display = 'block';
                     alert('✅ 코멘트가 저장되었습니다!');
                     
                     // 화면 업데이트
-                    var displayDiv = document.getElementById('commentDisplay');
-                    if (newComment) {
-                        displayDiv.innerHTML = newComment;
+                  var displayDiv = document.getElementById('commentDisplay');
+if (newComment) {
+    displayDiv.innerHTML = newComment.replace(/\n/g, '<br>');  /* ⭐ \n을 <br>로 변환 ⭐ */
                     } else {
                         displayDiv.innerHTML = '<span class="comment-empty">아직 작성된 코멘트가 없습니다.</span>';
                     }
