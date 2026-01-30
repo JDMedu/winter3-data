@@ -5330,8 +5330,8 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             
             // 6. 학생 데이터 처리 (이 부분은 기존 코드 그대로 이어짐)
             console.log('=== 학생 데이터 처리 시작 ===');
-            for (var s = 0; s < testSheetNames.length; s++) {
-                var sheetName = testSheetNames[s];
+           for (var s = 0; s < testSheetNames.length; s++) {
+    var sheetName = testSheetNames[s];
                 if (!workbook.Sheets[sheetName]) continue;
                 
                 console.log('처리 중인 시트:', sheetName);
@@ -5348,47 +5348,35 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                 console.log(sheetName + ' 첫 번째 데이터 행:', jsonData[1]);
 
                 for (var i = 1; i < jsonData.length; i++) {
-                    var row = jsonData[i];
-                    if (!row || !row[0]) continue;
-                    
-                    var name = row[0];
-                    if (!studentsByName[name]) continue;
-                    
-                    var attendanceNumber = row[1];
-                    var subjectTypeFromSheet = row[2]; // C열: 선택과목 (직접 읽기)
-                    var gradeFromSheet = row[3]; // D열: 등급 (직접 읽기)
-                    var scoreFromSheet = row[4]; // E열: 점수
-                    
-                    console.log('\n=== 학생 처리:', name, '(' + attendanceNumber + ') ===');
-                    console.log('선택과목:', subjectTypeFromSheet);
-                    console.log('등급:', gradeFromSheet);
-                    console.log('점수:', scoreFromSheet);
-                    
-                    // 첫 번째 시트에서 추출한 출처 정보 사용
-                    var source = '';
-                    if (window.testSources && window.testSources[sheetName]) {
-                        source = window.testSources[sheetName];
-                    }
-                    console.log('시험:', sheetName, '출처:', source);
-                    
-                    // 과목별 점수 수집 (F열부터)
-                    var details = {};
-                    var ratios = {};
-                    
-                    for (var j = 5; j < Math.min(headers.length, row.length); j++) {
-                        var subject = headers[j];
-                        var subjectScore = row[j];
-                        
-                        if (subject && subjectScore !== null && subjectScore !== undefined && subjectScore !== '') {
-                            details[subject] = subjectScore;
-                            
-                            var maxScore = sheetMaxScores[subject];
-                            if (maxScore) {
-                                ratios[subject] = Math.round((subjectScore / maxScore) * 100);
-                           
-                            }
-                        }
-                    }
+        var row = jsonData[i];
+        var name = row[0];
+        var subjectTypeFromSheet = row[2]; // 선택과목
+        
+        // ⭐ 선택과목에 따라 적절한 만점 선택 ⭐
+        var sheetMaxScores = {};
+        if (subjectTypeFromSheet && subjectTypeFromSheet.includes('언어')) {
+            sheetMaxScores = maxScores[sheetName] ? maxScores[sheetName]['언어와매체'] : {};
+        } else {
+            sheetMaxScores = maxScores[sheetName] ? maxScores[sheetName]['화법과작문'] : {};
+        }
+        
+        // 과목별 점수 수집
+        var details = {};
+        var ratios = {};
+        
+        for (var j = 5; j < Math.min(headers.length, row.length); j++) {
+            var subject = headers[j];
+            var subjectScore = row[j];
+            
+            if (subject && subjectScore !== null && subjectScore !== undefined && subjectScore !== '') {
+                details[subject] = subjectScore;
+                
+                var maxScore = sheetMaxScores[subject];
+                if (maxScore) {
+                    ratios[subject] = Math.round((subjectScore / maxScore) * 100);
+                }
+            }
+        }
                     
                     // 1. 선택과목은 C열에서 직접 읽기
                     var finalSubjectType = subjectTypeFromSheet || '화법과 작문';
@@ -5472,29 +5460,35 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
             return;
         }
         
-        // 만점 설정 - 헤더명 그대로 사용!
-        var maxScores = {};
+        // ⭐⭐⭐ 선택과목별로 만점 2벌 저장! ⭐⭐⭐
+        var maxScores = {
+            '언어와매체': {},  // 이대건 기준
+            '화법과작문': {}   // 오진형 기준
+        };
         
         for (var col = 0; col < headers.length; col++) {
             var header = String(headers[col]).trim();
             var 이대건점수 = parseFloat(이대건[col]) || 0;
             var 오진형점수 = parseFloat(오진형[col]) || 0;
             
-            // 점수가 있는 과목만 처리
             if (이대건점수 > 0 || 오진형점수 > 0) {
-                // 독서, 문학 → 둘 중 높은 점수
+                // 독서, 문학 → 공통 (둘 다 동일)
                 if (header.includes('독서') || header.includes('문학')) {
-                    maxScores[header] = Math.max(이대건점수, 오진형점수);
+                    var max = Math.max(이대건점수, 오진형점수);
+                    maxScores['언어와매체'][header] = max;
+                    maxScores['화법과작문'][header] = max;
                 }
-                // "언어 화법" → 이대건 (언어와 매체 학생)
+                // "언어 화법" → 선택과목별로 다름!
                 else if (header === '언어 화법') {
-                    maxScores[header] = 이대건점수;
-                    console.log('  → 언어 화법:', header, '=', 이대건점수, '(이대건)');
+                    maxScores['언어와매체'][header] = 이대건점수;  // 언어 점수
+                    maxScores['화법과작문'][header] = 오진형점수;  // 화법 점수
+                    console.log('  → 언어 화법: 언어와매체=' + 이대건점수 + ', 화법과작문=' + 오진형점수);
                 }
-                // "매체 작문" → 이대건 (언어와 매체 학생)
+                // "매체 작문" → 선택과목별로 다름!
                 else if (header === '매체 작문') {
-                    maxScores[header] = 이대건점수;
-                    console.log('  → 매체 작문:', header, '=', 이대건점수, '(이대건)');
+                    maxScores['언어와매체'][header] = 이대건점수;  // 매체 점수
+                    maxScores['화법과작문'][header] = 오진형점수;  // 작문 점수
+                    console.log('  → 매체 작문: 언어와매체=' + 이대건점수 + ', 화법과작문=' + 오진형점수);
                 }
             }
         }
