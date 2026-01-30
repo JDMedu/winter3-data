@@ -3216,19 +3216,22 @@ function adjustScoreByTestNumber(score, testName) {
     var scoreValues = [];  /* ⭐ 추가 ⭐ */
     var recentScores = [];
             
-            gradeKeys.forEach(function(testName) {
-                var gradeData = grades[testName];
-                
-                // ⭐ 등급 계산 추가 ⭐
-                var finalGrade = gradeData.grade;
-                if (!finalGrade || finalGrade === null || finalGrade === 'null') {
-                    var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
-                    finalGrade = getGradeFromPercentile(percentile);
-                }
-                
-                if (finalGrade) gradeValues.push(parseInt(finalGrade));
-                if (gradeData.score) scoreValues.push(parseInt(gradeData.score));
-            });
+           gradeKeys.forEach(function(testName) {
+        var gradeData = grades[testName];
+        
+        // ⭐ 등급 계산 추가 ⭐
+        var finalGrade = gradeData.grade;
+        if (!finalGrade || finalGrade === null || finalGrade === 'null') {
+            var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+            finalGrade = getGradeFromPercentile(percentile);
+        }
+        
+        if (finalGrade) gradeValues.push(parseInt(finalGrade));
+        if (gradeData.score) {
+            scores.push(parseInt(gradeData.score));  /* ⭐ 이 줄 추가! ⭐ */
+            scoreValues.push(parseInt(gradeData.score));
+        }
+    });
             
             // 최근 3회 점수
             recentScores = scores.slice(-3);
