@@ -5352,20 +5352,20 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         var name = row[0];
         var subjectTypeFromSheet = row[2]; // 선택과목
         
-        // ⭐ 선택과목에 따라 적절한 만점 선택 ⭐
-        var sheetMaxScores = {};
-        if (subjectTypeFromSheet && subjectTypeFromSheet.includes('언어')) {
-            sheetMaxScores = maxScores[sheetName] ? maxScores[sheetName]['언어와매체'] : {};
-        } else {
-            sheetMaxScores = maxScores[sheetName] ? maxScores[sheetName]['화법과작문'] : {};
-        }
-        
-        // 과목별 점수 수집
-        var details = {};
-        var ratios = {};
+       // ⭐ 선택과목에 따라 적절한 만점 선택 ⭐
+var track = getTrack(subjectTypeFromSheet);  // '언어와매체' 또는 '화법과작문'
+var sheetMaxScores =
+  (maxScores[sheetName] && maxScores[sheetName][track])
+    ? maxScores[sheetName][track]
+    : {};
+
+// 과목별 점수 수집
+var details = {};
+var ratios = {};
+
         
         for (var j = 5; j < Math.min(headers.length, row.length); j++) {
-            var subject = headers[j];
+            var subject = normHeader(headers[j]); // 공백 제거 통일
             var subjectScore = row[j];
             
             if (subject && subjectScore !== null && subjectScore !== undefined && subjectScore !== '') {
@@ -5424,82 +5424,70 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             }
         }
         
-function extractMaxScoreswinter3(workbook, testSheetNames) {
-    console.log('🔥 만점 추출 시작');
-    var result = {};
-    
-    testSheetNames.forEach(function(sheetName) {
-        var sheet = workbook.Sheets[sheetName];
-        if (!sheet) return;
-        
-        var data = XLSX.utils.sheet_to_json(sheet, {header: 1});
-        var headers = data[0];
-        
-        // 이대건(2274), 오진형(2284) 찾기
-        var 이대건 = null;
-        var 오진형 = null;
-        
-        for (var i = 1; i < data.length; i++) {
-            var row = data[i];
-            var attendanceNumber = String(row[1]).trim();
-            
-            if (attendanceNumber === '2274') {
-                이대건 = row;
-                console.log('✅ 이대건 발견:', sheetName);
-            }
-            if (attendanceNumber === '2284') {
-                오진형 = row;
-                console.log('✅ 오진형 발견:', sheetName);
-            }
-            
-            if (이대건 && 오진형) break;
-        }
-        
-        if (!이대건 || !오진형) {
-            console.warn('⚠️ 만점 학생 없음:', sheetName);
-            return;
-        }
-        
-        // ⭐⭐⭐ 선택과목별로 만점 2벌 저장! ⭐⭐⭐
-        var maxScores = {
-            '언어와매체': {},  // 이대건 기준
-            '화법과작문': {}   // 오진형 기준
-        };
-        
-        for (var col = 0; col < headers.length; col++) {
-            var header = String(headers[col]).trim();
-            var 이대건점수 = parseFloat(이대건[col]) || 0;
-            var 오진형점수 = parseFloat(오진형[col]) || 0;
-            
-            if (이대건점수 > 0 || 오진형점수 > 0) {
-                // 독서, 문학 → 공통 (둘 다 동일)
-                if (header.includes('독서') || header.includes('문학')) {
-                    var max = Math.max(이대건점수, 오진형점수);
-                    maxScores['언어와매체'][header] = max;
-                    maxScores['화법과작문'][header] = max;
-                }
-                // "언어 화법" → 선택과목별로 다름!
-                else if (header === '언어 화법') {
-                    maxScores['언어와매체'][header] = 이대건점수;  // 언어 점수
-                    maxScores['화법과작문'][header] = 오진형점수;  // 화법 점수
-                    console.log('  → 언어 화법: 언어와매체=' + 이대건점수 + ', 화법과작문=' + 오진형점수);
-                }
-                // "매체 작문" → 선택과목별로 다름!
-                else if (header === '매체 작문') {
-                    maxScores['언어와매체'][header] = 이대건점수;  // 매체 점수
-                    maxScores['화법과작문'][header] = 오진형점수;  // 작문 점수
-                    console.log('  → 매체 작문: 언어와매체=' + 이대건점수 + ', 화법과작문=' + 오진형점수);
-                }
-            }
-        }
-        
-        console.log('✅ ' + sheetName + ' 만점:', maxScores);
-        result[sheetName] = maxScores;
-    });
-    
-    console.log('=== 최종 만점 결과 ===', result);
-    return result;
+function getTrack(subjectTypeCell) {
+  var v = (subjectTypeCell || '').toString().replace(/\s/g,'');
+  if (v.includes('언어와매체') || v.includes('언매')) return '언어와매체';
+  if (v.includes('화법과작문') || v.includes('화작')) return '화법과작문';
+  return '화법과작문';
 }
+
+function normHeader(h) {
+  return String(h == null ? '' : h).replace(/\s/g,'').trim();
+}
+
+function extractMaxScoreswinter3(workbook, testSheetNames) {
+  var result = {};
+
+  testSheetNames.forEach(function(sheetName) {
+    var sheet = workbook.Sheets[sheetName];
+    if (!sheet) return;
+
+    var data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    if (!data || data.length < 2) return;
+
+    var headers = data[0];
+
+    var rowA = null, rowB = null;
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var attendanceNumber = String(row[1] || '').trim();
+      if (attendanceNumber === '2274') rowA = row;
+      if (attendanceNumber === '2284') rowB = row;
+      if (rowA && rowB) break;
+    }
+
+    if (!rowA || !rowB) return;
+
+    var trackA = getTrack(rowA[2]);
+    var trackB = getTrack(rowB[2]);
+
+    var maxScores = { '언어와매체': {}, '화법과작문': {} };
+
+    for (var col = 0; col < headers.length; col++) {
+      var header = normHeader(headers[col]);
+      if (!header) continue;
+
+      var a = parseFloat(rowA[col]) || 0;
+      var b = parseFloat(rowB[col]) || 0;
+      if (a <= 0 && b <= 0) continue;
+
+      if (header.includes('독서') || header.includes('문학')) {
+        var m = Math.max(a, b);
+        maxScores['언어와매체'][header] = m;
+        maxScores['화법과작문'][header] = m;
+      } else {
+        maxScores[trackA][header] = a;
+        maxScores[trackB][header] = b;
+      }
+    }
+
+    result[sheetName] = maxScores;
+  });
+
+  return result;
+}
+
             
         
         function showProgress(show) {
