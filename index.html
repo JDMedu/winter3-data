@@ -6054,13 +6054,13 @@ document.getElementById('studyPlanSection').style.display = 'block';
                 
                // ⭐ 등급 계산 추가 ⭐
                if (!displayGrade || displayGrade === null || displayGrade === 'null' || displayGrade === 0) {
-    // 1순위: 등급컷
+   // 1순위: 등급컷
     if (window.gradeCuts && window.gradeCuts[testName]) {
-        displayGrade = calculateGradeFromCut(...);
+        displayGrade = calculateGradeFromCut(gradeData.score, testName, gradeData.subjectType);
     }
     // 2순위: 백분위
     else {
-        var percentile = calculatePercentile(...);
+        var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
         displayGrade = getGradeFromPercentile(percentile);
     }
 }
