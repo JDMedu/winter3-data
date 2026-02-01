@@ -3243,11 +3243,11 @@ function adjustScoreByTestNumber(score, testName) {
             // 최근 3회 점수
             recentScores = scores.slice(-3);
             
-            var avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
-            var avgGrade = gradeValues.length > 0 ? Math.round(gradeValues.reduce((a, b) => a + b) / gradeValues.length * 10) / 10 : 0;
-            var bestGrade = gradeValues.length > 0 ? Math.min(...gradeValues) : 9;
-            var bestGrade = gradeValues.length > 0 ? Math.min(...gradeValues) : 0;
-            var latestScore = scores.length > 0 ? scores[scores.length - 1] : 0;
+           var avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
+var avgGrade = gradeValues.length > 0 ? Math.round(gradeValues.reduce((a, b) => a + b) / gradeValues.length * 10) / 10 : 0;
+var bestScore = scoreValues.length > 0 ? Math.max(...scoreValues) : 0;  // ⭐ 추가!
+var bestGrade = gradeValues.length > 0 ? Math.min(...gradeValues) : 9;  // ⭐ 하나만 남김!
+var latestScore = scores.length > 0 ? scores[scores.length - 1] : 0;
             
             // 성적 변화 계산
             var scoreChange = 0;
