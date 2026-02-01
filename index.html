@@ -5607,58 +5607,89 @@ function normHeader(h) {
 }
 
 function extractMaxScoreswinter3(workbook, testSheetNames) {
-  var result = {};
-
-  testSheetNames.forEach(function(sheetName) {
-    var sheet = workbook.Sheets[sheetName];
-    if (!sheet) return;
-
-    var data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    if (!data || data.length < 2) return;
-
-    var headers = data[0];
-
-    var rowA = null, rowB = null;
-
-    for (var i = 1; i < data.length; i++) {
-      var row = data[i];
-      var attendanceNumber = String(row[1] || '').trim();
-      if (attendanceNumber === '2274') rowA = row;
-      if (attendanceNumber === '2284') rowB = row;
-      if (rowA && rowB) break;
-    }
-
-    if (!rowA || !rowB) return;
-
-    var trackA = getTrack(rowA[2]);
-    var trackB = getTrack(rowB[2]);
-
-    var maxScores = { '언어와매체': {}, '화법과작문': {} };
-
-    for (var col = 0; col < headers.length; col++) {
-      var header = normHeader(headers[col]);
-      if (!header) continue;
-
-      var a = parseFloat(rowA[col]) || 0;
-      var b = parseFloat(rowB[col]) || 0;
-      if (a <= 0 && b <= 0) continue;
-
-      if (header.includes('독서') || header.includes('문학')) {
-        var m = Math.max(a, b);
-        maxScores['언어와매체'][header] = m;
-        maxScores['화법과작문'][header] = m;
-      } else {
-        maxScores[trackA][header] = a;
-        maxScores[trackB][header] = b;
-      }
-    }
-
-    result[sheetName] = maxScores;
-  });
-
-  return result;
+    console.log('🔥 만점 추출 시작');
+    var result = {};
+    
+    testSheetNames.forEach(function(sheetName) {
+        var sheet = workbook.Sheets[sheetName];
+        if (!sheet) return;
+        
+        var data = XLSX.utils.sheet_to_json(sheet, {header: 1});
+        if (!data || data.length < 2) return;
+        
+        var headers = data[0];
+        
+        // ⭐ 선택과목별 최고점 학생 찾기 ⭐
+        var 언어와매체최고 = null;
+        var 화법과작문최고 = null;
+        var 언어와매체최고점 = 0;
+        var 화법과작문최고점 = 0;
+        
+        for (var i = 1; i < data.length; i++) {
+            var row = data[i];
+            var 선택과목 = String(row[2] || '').trim();
+            var 총점 = parseFloat(row[4]) || 0;
+            
+            if (선택과목.includes('언어') && 총점 > 언어와매체최고점) {
+                언어와매체최고 = row;
+                언어와매체최고점 = 총점;
+                console.log('언어와매체 최고점 갱신:', row[0], row[1], 총점 + '점');
+            }
+            
+            if (선택과목.includes('화법') && 총점 > 화법과작문최고점) {
+                화법과작문최고 = row;
+                화법과작문최고점 = 총점;
+                console.log('화법과작문 최고점 갱신:', row[0], row[1], 총점 + '점');
+            }
+        }
+        
+        if (!언어와매체최고 || !화법과작문최고) {
+            console.warn('⚠️ 만점 학생 부족:', sheetName);
+            return;
+        }
+        
+        console.log('✅ 최종 선정:', sheetName);
+        console.log('  언어와매체:', 언어와매체최고[0], 언어와매체최고[1], 언어와매체최고점 + '점');
+        console.log('  화법과작문:', 화법과작문최고[0], 화법과작문최고[1], 화법과작문최고점 + '점');
+        
+        // 선택과목별로 만점 2벌 저장
+        var maxScores = {
+            '언어와매체': {},
+            '화법과작문': {}
+        };
+        
+        for (var col = 0; col < headers.length; col++) {
+            var header = normHeader(headers[col]);
+            var 언어와매체점수 = parseFloat(언어와매체최고[col]) || 0;
+            var 화법과작문점수 = parseFloat(화법과작문최고[col]) || 0;
+            
+            if (언어와매체점수 > 0 || 화법과작문점수 > 0) {
+                // 독서, 문학 → 공통 (둘 중 높은 점수)
+                if (header.includes('독서') || header.includes('문학')) {
+                    var max = Math.max(언어와매체점수, 화법과작문점수);
+                    maxScores['언어와매체'][header] = max;
+                    maxScores['화법과작문'][header] = max;
+                }
+                // "언어화법" → 선택과목별로 다름!
+                else if (header === '언어화법') {
+                    maxScores['언어와매체'][header] = 언어와매체점수;
+                    maxScores['화법과작문'][header] = 화법과작문점수;
+                }
+                // "매체작문" → 선택과목별로 다름!
+                else if (header === '매체작문') {
+                    maxScores['언어와매체'][header] = 언어와매체점수;
+                    maxScores['화법과작문'][header] = 화법과작문점수;
+                }
+            }
+        }
+        
+        console.log('✅ ' + sheetName + ' 만점:', maxScores);
+        result[sheetName] = maxScores;
+    });
+    
+    console.log('=== 최종 만점 결과 ===', result);
+    return result;
 }
-
             
         
         function showProgress(show) {
