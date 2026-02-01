@@ -5890,24 +5890,24 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '</tbody></table></div>';
             
             tableHtml += '<div class="summary-table" style="margin-top: 30px;">';
-            tableHtml += '<h3>📈 과목별 성취도 비율 현황</h3>';
-            tableHtml += '<div style="overflow-x: auto;">';
-            tableHtml += '<table class="grade-table" style="min-width: 1200px; font-size: 0.8em;">';
-            tableHtml += '<thead><tr>';
-            tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">시험</th>';
-            tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">선택과목</th>';
-            tableHtml += '<th style="min-width: 50px; font-size: 0.85em;">점수</th>';
-            tableHtml += '<th style="min-width: 50px; font-size: 0.85em;">등급</th>';
-            tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">독서(인문,독서론)</th>';
-            tableHtml += '<th style="min-width: 60px; font-size: 0.85em;">독서(사회)</th>';
-            tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">독서(과학)</th>';
-            tableHtml += '<th style="min-width: 80px; font-size: 0.85em;">문학(현대시)</th>';
-            tableHtml += '<th style="min-width: 90px; font-size: 0.85em;">문학(현대소설)</th>';
-            tableHtml += '<th style="min-width: 90px; font-size: 0.85em;">문학(고전시가)</th>';
-            tableHtml += '<th style="min-width: 90px; font-size: 0.85em;">문학(고전소설)</th>';
-            tableHtml += '<th style="min-width: 70px; font-size: 0.85em;">언어화법</th>';
-            tableHtml += '<th style="min-width: 70px; font-size: 0.85em;">매체작문</th>';
-            tableHtml += '</tr></thead><tbody>';
+tableHtml += '<h3>📈 과목별 성취도 비율 현황</h3>';
+tableHtml += '<div style="overflow-x: auto;">';
+tableHtml += '<table class="grade-table" style="min-width: 900px; font-size: 0.75em;">';  // ⭐ 1200px → 900px
+tableHtml += '<thead><tr>';
+tableHtml += '<th style="min-width: 60px; font-size: 0.8em;">시험</th>';          // ⭐ 80 → 60
+tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">선택과목</th>';      // ⭐ 80 → 65
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em;">점수</th>';          // ⭐ 50 → 40
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em;">등급</th>';          // ⭐ 50 → 40
+tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">인문,독서론</th>';    // ⭐ 80 → 65, 간략화
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">사회</th>';    // ⭐ 60 → 50
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">과학</th>';    // ⭐ 80 → 50
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">현대시</th>';        // ⭐ 80 → 55, 간략화
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">현대소설</th>';      // ⭐ 90 → 55, 간략화
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">고전시가</th>';      // ⭐ 90 → 55, 간략화
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">고전소설</th>';      // ⭐ 90 → 55, 간략화
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">언어화법</th>';      // ⭐ 70 → 50
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">매체작문</th>';      // ⭐ 70 → 50
+tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
                     var testName = allTests[i];
