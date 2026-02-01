@@ -3205,7 +3205,7 @@ function adjustScoreByTestNumber(score, testName) {
 }
 
 // 📊 통계 계산 함수
-        function calculateStatistics(student) {
+       function calculateStatistics(student) {
     var grades = student.grades;
     var gradeKeys = Object.keys(grades);
     
@@ -3213,22 +3213,29 @@ function adjustScoreByTestNumber(score, testName) {
     
     var scores = [];
     var gradeValues = [];
-    var scoreValues = [];  /* ⭐ 추가 ⭐ */
+    var scoreValues = [];
     var recentScores = [];
-            
-           gradeKeys.forEach(function(testName) {
+    
+    gradeKeys.forEach(function(testName) {
         var gradeData = grades[testName];
         
         // ⭐ 등급 계산 추가 ⭐
         var finalGrade = gradeData.grade;
-        if (!finalGrade || finalGrade === null || finalGrade === 'null') {
-            var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
-            finalGrade = getGradeFromPercentile(percentile);
+        if (!finalGrade || finalGrade === null || finalGrade === 'null' || finalGrade === 0) {
+            // 1순위: 등급컷
+            if (window.gradeCuts && window.gradeCuts[testName]) {
+                finalGrade = calculateGradeFromCut(gradeData.score, testName, gradeData.subjectType);
+            }
+            // 2순위: 백분위
+            else {
+                var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+                finalGrade = getGradeFromPercentile(percentile);
+            }
         }
         
-        if (finalGrade) gradeValues.push(parseInt(finalGrade));
+        if (finalGrade && finalGrade > 0) gradeValues.push(parseInt(finalGrade));
         if (gradeData.score) {
-            scores.push(parseInt(gradeData.score));  /* ⭐ 이 줄 추가! ⭐ */
+            scores.push(parseInt(gradeData.score));
             scoreValues.push(parseInt(gradeData.score));
         }
     });
@@ -3238,7 +3245,7 @@ function adjustScoreByTestNumber(score, testName) {
             
             var avgScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b) / scores.length) : 0;
             var avgGrade = gradeValues.length > 0 ? Math.round(gradeValues.reduce((a, b) => a + b) / gradeValues.length * 10) / 10 : 0;
-            var bestScore = scores.length > 0 ? Math.max(...scores) : 0;
+            var bestGrade = gradeValues.length > 0 ? Math.min(...gradeValues) : 9;
             var bestGrade = gradeValues.length > 0 ? Math.min(...gradeValues) : 0;
             var latestScore = scores.length > 0 ? scores[scores.length - 1] : 0;
             
@@ -3261,18 +3268,39 @@ function adjustScoreByTestNumber(score, testName) {
         }
 
 // 최근 4회 평균 점수 계산
-var recent4Scores = scores.slice(-4);  // ✅ scores로 수정!
-var recent4Avg = recent4Scores.length > 0 
-    ? Math.round(recent4Scores.reduce((a, b) => a + b) / recent4Scores.length) 
-    : avgScore;
-
-// 선택과목별 백분위 계산 (최근 시험 이름 사용)
-var recentTestName = recentTests.length > 0 ? recentTests[recentTests.length - 1] : '';
-var percentile = calculatePercentile(recent4Avg, recentSubjectType, recentTestName);
-
-            // 백분위 기반 평균 등급 계산
-var avgGradeFromPercentile = getGradeFromPercentile(percentile);
+            var recent4Scores = scores.slice(-4);
+            var recent4Avg = recent4Scores.length > 0 
+                ? Math.round(recent4Scores.reduce((a, b) => a + b) / recent4Scores.length) 
+                : avgScore;
             
+            // ⭐⭐⭐ 백분위 계산 로직 수정 ⭐⭐⭐
+            var percentile = 0;
+            var recentTestName = recentTests.length > 0 ? recentTests[recentTests.length - 1] : '';
+            
+            // 최근 4회 중 등급컷이 있는 시험 찾기
+            var hasGradeCut = false;
+            for (var i = recentTests.length - 1; i >= 0; i--) {
+                var testName = recentTests[i];
+                if (window.gradeCuts && window.gradeCuts[testName]) {
+                    // 등급컷이 있으면 등급 → 백분위 변환
+                    var grade = calculateGradeFromCut(recent4Avg, testName, recentSubjectType);
+                    if (grade) {
+                        percentile = getPercentileFromGrade(grade);
+                        hasGradeCut = true;
+                        console.log('✅ 백분위(등급컷 기반):', percentile, '등급:', grade);
+                        break;
+                    }
+                }
+            }
+            
+            // 등급컷이 없으면 기존 백분위 테이블 사용
+            if (!hasGradeCut) {
+                percentile = calculatePercentile(recent4Avg, recentSubjectType, recentTestName);
+                console.log('✅ 백분위(임의 테이블):', percentile);
+            }
+            
+            // 백분위 기반 평균 등급 계산
+            var avgGradeFromPercentile = getGradeFromPercentile(percentile);
             
             return {
                 avgScore: avgScore,
@@ -3295,8 +3323,24 @@ var avgGradeFromPercentile = getGradeFromPercentile(percentile);
             return variance;
         }
         
-       // 🏆 확장된 뱃지 시스템 (43개)
-function generateAchievementBadges(student, stats) {
+        // 등급 → 백분위 변환 함수
+        function getPercentileFromGrade(grade) {
+            var gradeToPercentile = {
+                1: 96,
+                2: 89,
+                3: 77,
+                4: 61,
+                5: 40,
+                6: 23,
+                7: 11,
+                8: 4,
+                9: 0
+            };
+            return gradeToPercentile[grade] || 0;
+        }
+        
+        // 🏆 확장된 뱃지 시스템 (43개)
+        function generateAchievementBadges(student, stats) {
     var badges = [];
     var grades = student.grades;
     var gradeKeys = Object.keys(grades);
@@ -4098,61 +4142,83 @@ setTimeout(function() {
 }, 2000); // 2초 후 분석 결과 표시
         }
         
-        function performAIAnalysis(student) {
-            var grades = student.grades;
-            var gradeKeys = Object.keys(grades);
-            
-            if (gradeKeys.length === 0) {
-                return {
-                    summary: "분석할 성적 데이터가 부족합니다.",
-                    strengths: [],
-                    weaknesses: [],
-                    trends: [],
-                    recommendations: [],
-                    gradeStrategy: null
-                };
+function performAIAnalysis(student) {
+    var grades = student.grades;
+    var gradeKeys = Object.keys(grades);
+    
+    if (gradeKeys.length === 0) {
+        return {
+            summary: "분석할 성적 데이터가 부족합니다.",
+            strengths: [],
+            weaknesses: [],
+            trends: [],
+            recommendations: [],
+            gradeStrategy: null
+        };
+    }
+    
+    // 등급 및 점수 분석
+    var gradeValues = [];
+    var scoreValues = [];
+    var subjectScores = {};
+    var subjectRatios = {};
+    var testDetails = {}; // 시험별 상세 정보 저장
+    
+    gradeKeys.forEach(function(testName) {
+        var gradeData = grades[testName];
+        
+        // ⭐⭐⭐ 등급 계산 수정 ⭐⭐⭐
+        var finalGrade = gradeData.grade;
+        
+        // grade가 null이면 계산
+        if (!finalGrade || finalGrade === null || finalGrade === 'null' || finalGrade === 0) {
+            // 1순위: 등급컷으로 계산
+            if (window.gradeCuts && window.gradeCuts[testName]) {
+                finalGrade = calculateGradeFromCut(gradeData.score, testName, gradeData.subjectType);
             }
-            
-            // 등급 및 점수 분석
-            var gradeValues = [];
-            var scoreValues = [];
-            var subjectScores = {};
-            var subjectRatios = {};
-            var testDetails = {}; // 시험별 상세 정보 저장
-            
-            gradeKeys.forEach(function(testName) {
-                var gradeData = grades[testName];
-                if (gradeData.grade) gradeValues.push(parseInt(gradeData.grade));
-                if (gradeData.score) scoreValues.push(parseInt(gradeData.score));
+            // 2순위: 백분위로 계산
+            else {
+                var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+                finalGrade = getGradeFromPercentile(percentile);
+            }
+        }
+        
+        if (finalGrade && finalGrade > 0) {
+            gradeValues.push(parseInt(finalGrade));
+        }
+        
+        if (gradeData.score) {
+            scoreValues.push(parseInt(gradeData.score));
+        }
+        
+        // 시험별 상세 정보 저장 (최고 성적 찾기용)
+        testDetails[testName] = {
+            grade: parseInt(finalGrade),
+            score: parseInt(gradeData.score),
+            source: gradeData.source || '',
+            subjectType: gradeData.subjectType || ''
+        };
+        
+        // 과목별 점수 및 비율 수집
+        if (gradeData.details) {
+            Object.keys(gradeData.details).forEach(function(subject) {
+                if (!subjectScores[subject]) subjectScores[subject] = [];
+                if (!subjectRatios[subject]) subjectRatios[subject] = [];
                 
-                // 시험별 상세 정보 저장 (최고 성적 찾기용)
-                testDetails[testName] = {
-                    grade: parseInt(gradeData.grade),
-                    score: parseInt(gradeData.score),
-                    source: gradeData.source || '',
-                    subjectType: gradeData.subjectType || ''
-                };
-                
-                // 과목별 점수 및 비율 수집
-                if (gradeData.details) {
-                    Object.keys(gradeData.details).forEach(function(subject) {
-                        if (!subjectScores[subject]) subjectScores[subject] = [];
-                        if (!subjectRatios[subject]) subjectRatios[subject] = [];
-                        
-                        subjectScores[subject].push(gradeData.details[subject]);
-                        if (gradeData.ratios && gradeData.ratios[subject]) {
-                            subjectRatios[subject].push(gradeData.ratios[subject]);
-                        }
-                    });
+                subjectScores[subject].push(gradeData.details[subject]);
+                if (gradeData.ratios && gradeData.ratios[subject]) {
+                    subjectRatios[subject].push(gradeData.ratios[subject]);
                 }
             });
-            
-            // 통계 계산
-            var avgGrade = gradeValues.length > 0 ? Math.round(gradeValues.reduce((a, b) => a + b) / gradeValues.length * 10) / 10 : 0;
-            var avgScore = scoreValues.length > 0 ? Math.round(scoreValues.reduce((a, b) => a + b) / scoreValues.length) : 0;
-            var bestGrade = gradeValues.length > 0 ? Math.min(...gradeValues) : 0;
-            var bestScore = scoreValues.length > 0 ? Math.max(...scoreValues) : 0;
-            var latestGrade = gradeValues.length > 0 ? gradeValues[gradeValues.length - 1] : 0;
+        }
+    });
+    
+    // 통계 계산
+    var avgScore = scoreValues.length > 0 ? Math.round(scoreValues.reduce((a, b) => a + b) / scoreValues.length) : 0;
+    var avgGrade = gradeValues.length > 0 ? Math.round(gradeValues.reduce((a, b) => a + b) / gradeValues.length * 10) / 10 : 0;
+    var bestScore = scoreValues.length > 0 ? Math.max(...scoreValues) : 0;
+    var bestGrade = gradeValues.length > 0 ? Math.min(...gradeValues) : 9;
+    var latestGrade = gradeValues.length > 0 ? gradeValues[gradeValues.length - 1] : 9;
             
             // 최고 성적 시험 찾기
             var bestTest = '';
@@ -5200,7 +5266,83 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
         }
 
         
+       // 등급컷 시트에서 등급 기준 추출
+function extractGradeCuts(workbook) {
+    var gradeCuts = {};
+    
+    // 3번째 시트가 등급컷 시트
+    var gradeCutSheetName = workbook.SheetNames[2];
+    if (!workbook.Sheets[gradeCutSheetName]) {
+        console.log('등급컷 시트를 찾을 수 없습니다');
+        return gradeCuts;
+    }
+    
+    var sheet = workbook.Sheets[gradeCutSheetName];
+    var data = XLSX.utils.sheet_to_json(sheet, {header: 1});
+    
+    console.log('=== 등급컷 추출 시작 ===');
+    
+    for (var i = 1; i < data.length; i++) {
+        var row = data[i];
+        if (!row || !row[0] || !row[1]) continue;
         
+        var testName = String(row[0]).trim();      // A열: 시험명
+        var subjectType = String(row[1]).trim();   // B열: 선택과목
+        
+        // 시험명으로 객체 생성
+        if (!gradeCuts[testName]) {
+            gradeCuts[testName] = {};
+        }
+        
+        // 선택과목 타입 정규화
+        var track = '화법과작문';
+        if (subjectType.includes('언어') || subjectType.includes('매체')) {
+            track = '언어와매체';
+        }
+        
+        // 등급컷 저장 (C열부터 1~8등급)
+        gradeCuts[testName][track] = {
+            1: parseFloat(row[2]) || 0,   // C열: 1등급
+            2: parseFloat(row[3]) || 0,   // D열: 2등급
+            3: parseFloat(row[4]) || 0,   // E열: 3등급
+            4: parseFloat(row[5]) || 0,   // F열: 4등급
+            5: parseFloat(row[6]) || 0,   // G열: 5등급
+            6: parseFloat(row[7]) || 0,   // H열: 6등급
+            7: parseFloat(row[8]) || 0,   // I열: 7등급
+            8: parseFloat(row[9]) || 0    // J열: 8등급
+        };
+        
+        console.log('등급컷 추출:', testName, '-', track);
+        console.log('  1등급:', gradeCuts[testName][track][1]);
+    }
+    
+    window.gradeCuts = gradeCuts;
+    console.log('최종 등급컷 데이터:', gradeCuts);
+    return gradeCuts;
+}
+        
+// 점수로 등급 계산
+function calculateGradeFromCut(score, testName, subjectType) {
+    if (!window.gradeCuts || !window.gradeCuts[testName]) {
+        return null;
+    }
+    
+    var track = getTrack(subjectType);
+    var cuts = window.gradeCuts[testName][track];
+    
+    if (!cuts) {
+        return null;
+    }
+    
+    // 등급컷 기준으로 등급 결정
+    for (var grade = 1; grade <= 8; grade++) {
+        if (score >= cuts[grade]) {
+            return grade;
+        }
+    }
+    
+    return 9; // 8등급컷 미만은 9등급
+}
             
                
         // parseExcelDatawinter3 함수 수정 (기존 등급컷 처리 부분 교체)
@@ -5323,10 +5465,14 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
             
             console.log('발견된 모클 시트들:', testSheetNames);
             
-            // ⭐⭐⭐ 5. 만점 추출 - 여기! ⭐⭐⭐
-            console.log('=== 고3 만점 추출 시작 ===');
-            maxScores = extractMaxScoreswinter3(workbook, testSheetNames);
-            console.log('추출 완료된 maxScores:', maxScores);
+           // ⭐⭐⭐ 5-1. 등급컷 추출 (만점 추출 전에!) ⭐⭐⭐
+console.log('=== 등급컷 추출 시작 ===');
+extractGradeCuts(workbook);
+
+// 5-2. 만점 추출
+console.log('=== 고3 만점 추출 시작 ===');
+maxScores = extractMaxScoreswinter3(workbook, testSheetNames);
+console.log('추출 완료된 maxScores:', maxScores);
             
            // 6. 학생 데이터 처리
 console.log('=== 학생 데이터 처리 시작 ===');
@@ -5394,25 +5540,37 @@ for (var s = 0; s < testSheetNames.length; s++) {
             }
         }
         
-        // 1. 선택과목은 C열에서 직접 읽기
-        var finalSubjectType = subjectTypeFromSheet || '화법과 작문';
-        
-        // 2. 등급은 D열에서 직접 읽기 (null이면 null 그대로)
-        var finalGrade = null;
-        if (gradeFromSheet && gradeFromSheet !== '' && gradeFromSheet !== null) {
-            finalGrade = parseInt(gradeFromSheet);
-        }
-        
-        studentsByName[name].grades[sheetName] = {
-            grade: finalGrade,
-            score: scoreFromSheet,
-            subjectType: finalSubjectType,
-            details: details,
-            ratios: ratios,
-            source: source  // ⭐ 이제 정의됨! ⭐
-        };
-    }
+     // 1. 선택과목은 C열에서 직접 읽기
+var finalSubjectType = subjectTypeFromSheet || '화법과 작문';
+
+// ⭐⭐⭐ 2. 등급 결정 우선순위 ⭐⭐⭐
+var finalGrade = null;
+
+// 1순위: 등급컷이 있으면 등급컷으로 계산
+if (window.gradeCuts && window.gradeCuts[sheetName]) {
+    finalGrade = calculateGradeFromCut(scoreFromSheet, sheetName, subjectTypeFromSheet);
+    console.log('  등급(등급컷):', finalGrade, '점수:', scoreFromSheet);
 }
+// 2순위: D열에 등급이 직접 입력되어 있으면 사용
+else if (gradeFromSheet && gradeFromSheet !== '' && gradeFromSheet !== null) {
+    finalGrade = parseInt(gradeFromSheet);
+    console.log('  등급(엑셀D열):', finalGrade);
+}
+// 3순위: 백분위로 계산 (폴백)
+else if (scoreFromSheet) {
+    var percentile = calculatePercentile(scoreFromSheet, subjectTypeFromSheet, sheetName);
+    finalGrade = getGradeFromPercentile(percentile);
+    console.log('  등급(백분위):', finalGrade, '백분위:', percentile);
+}
+
+studentsByName[name].grades[sheetName] = {
+    grade: finalGrade,
+    score: scoreFromSheet,
+    subjectType: finalSubjectType,
+    details: details,
+    ratios: ratios,
+    source: source
+};
             
             // 7. 최종 데이터 구성
             studentByNumber = {};
@@ -5683,15 +5841,14 @@ document.getElementById('studyPlanSection').style.display = 'block';
             tableHtml += '<th>등급</th>';
             tableHtml += '</tr></thead><tbody>';
             
-            for (var i = 0; i < allTests.length; i++) {
-                var testName = allTests[i];
-                var gradeData = student.grades[testName];
-                
-                // 미응시한 시험은 건너뛰기
-                if (!gradeData) continue;
-                
-                tableHtml += '<tr>';
-                tableHtml += '<td class="test-name">' + testName + '</td>';
+           for (var i = 0; i < allTests.length; i++) {
+        var testName = allTests[i];
+        var gradeData = student.grades[testName];
+        
+        if (!gradeData) continue;
+        
+        tableHtml += '<tr>';
+        tableHtml += '<td class="test-name">' + testName + '</td>';
                 
                 var subjectTypeClass = (gradeData.subjectType || '').replace(/\s/g, '_');
                 tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
@@ -5865,11 +6022,17 @@ document.getElementById('studyPlanSection').style.display = 'block';
             }
                 
                // ⭐ 등급 계산 추가 ⭐
-                var displayGrade = gradeData.grade;
-                if (!displayGrade || displayGrade === null) {
-                    var percentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
-                    displayGrade = getGradeFromPercentile(percentile);
-                }
+               if (!displayGrade || displayGrade === null || displayGrade === 'null' || displayGrade === 0) {
+    // 1순위: 등급컷
+    if (window.gradeCuts && window.gradeCuts[testName]) {
+        displayGrade = calculateGradeFromCut(...);
+    }
+    // 2순위: 백분위
+    else {
+        var percentile = calculatePercentile(...);
+        displayGrade = getGradeFromPercentile(percentile);
+    }
+}
                 
               gradeCard.innerHTML = 
                 '<h3 style="font-size: 1.1em; margin-bottom: 12px;">📝 ' + testName + '</h3>' +
