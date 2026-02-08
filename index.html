@@ -6535,31 +6535,27 @@ function openSubjectGraph(subjectName, studentData, event) {
    // 팝업 표시 (먼저 표시해야 위치 계산 가능)
     document.getElementById('subjectGraphOverlay').classList.add('active');
     
-    // 팝업 위치 설정
-    var popup = document.querySelector('.subject-graph-popup');
-    if (event) {
-        var clickX = event.clientX || event.pageX;
-        var clickY = event.clientY || event.pageY;
-        
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        
-        var popupWidth = 600;
-        var popupHeight = 500;
-        
-        var left = clickX + scrollLeft - (popupWidth / 2);
-        var top = clickY + scrollTop - 50;
-        
-        // 화면 밖으로 나가지 않도록
-        if (left < 20) left = 20;
-        if (left + popupWidth > window.innerWidth - 20) {
-            left = window.innerWidth - popupWidth - 20;
-        }
-        if (top < 20) top = 20;
-        
-        popup.style.left = left + 'px';
-        popup.style.top = top + 'px';
-    }
+    // 팝업 위치 설정 (화면 중앙)
+var popup = document.querySelector('.subject-graph-popup');
+
+// 화면 중앙에 고정
+var windowWidth = window.innerWidth;
+var windowHeight = window.innerHeight;
+var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+var popupWidth = 600;
+var popupHeight = 500;
+
+var left = (windowWidth - popupWidth) / 2;
+var top = scrollTop + (windowHeight - popupHeight) / 2;
+
+// 최소 여백 확보
+if (left < 20) left = 20;
+if (top < scrollTop + 20) top = scrollTop + 20;
+
+popup.style.left = left + 'px';
+popup.style.top = top + 'px';
+popup.style.transform = 'none';
     
     // 기존 차트 제거
     if (currentSubjectChart) {
@@ -6669,31 +6665,27 @@ function openScoreGraph(studentData, event) {
  // 팝업 표시
     document.getElementById('subjectGraphOverlay').classList.add('active');
     
-    // 팝업 위치 설정
-    var popup = document.querySelector('.subject-graph-popup');
-    if (event) {
-        var clickX = event.clientX || event.pageX;
-        var clickY = event.clientY || event.pageY;
-        
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        
-        var popupWidth = 600;
-        var popupHeight = 500;
-        
-        var left = clickX + scrollLeft - (popupWidth / 2);
-        var top = clickY + scrollTop - 50;
-        
-        // 화면 밖으로 나가지 않도록
-        if (left < 20) left = 20;
-        if (left + popupWidth > window.innerWidth - 20) {
-            left = window.innerWidth - popupWidth - 20;
-        }
-        if (top < 20) top = 20;
-        
-        popup.style.left = left + 'px';
-        popup.style.top = top + 'px';
-    }
+    // 팝업 위치 설정 (화면 중앙)
+var popup = document.querySelector('.subject-graph-popup');
+
+// 화면 중앙에 고정
+var windowWidth = window.innerWidth;
+var windowHeight = window.innerHeight;
+var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+var popupWidth = 600;
+var popupHeight = 500;
+
+var left = (windowWidth - popupWidth) / 2;
+var top = scrollTop + (windowHeight - popupHeight) / 2;
+
+// 최소 여백 확보
+if (left < 20) left = 20;
+if (top < scrollTop + 20) top = scrollTop + 20;
+
+popup.style.left = left + 'px';
+popup.style.top = top + 'px';
+popup.style.transform = 'none';
     
        
     // 기존 차트 제거
@@ -6799,31 +6791,27 @@ function openGradeGraph(studentData, event) {
   // 팝업 표시
     document.getElementById('subjectGraphOverlay').classList.add('active');
     
-    // 팝업 위치 설정
-    var popup = document.querySelector('.subject-graph-popup');
-    if (event) {
-        var clickX = event.clientX || event.pageX;
-        var clickY = event.clientY || event.pageY;
-        
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        
-        var popupWidth = 600;
-        var popupHeight = 500;
-        
-        var left = clickX + scrollLeft - (popupWidth / 2);
-        var top = clickY + scrollTop - 50;
-        
-        // 화면 밖으로 나가지 않도록
-        if (left < 20) left = 20;
-        if (left + popupWidth > window.innerWidth - 20) {
-            left = window.innerWidth - popupWidth - 20;
-        }
-        if (top < 20) top = 20;
-        
-        popup.style.left = left + 'px';
-        popup.style.top = top + 'px';
-    }
+   // 팝업 위치 설정 (화면 중앙)
+var popup = document.querySelector('.subject-graph-popup');
+
+// 화면 중앙에 고정
+var windowWidth = window.innerWidth;
+var windowHeight = window.innerHeight;
+var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+var popupWidth = 600;
+var popupHeight = 500;
+
+var left = (windowWidth - popupWidth) / 2;
+var top = scrollTop + (windowHeight - popupHeight) / 2;
+
+// 최소 여백 확보
+if (left < 20) left = 20;
+if (top < scrollTop + 20) top = scrollTop + 20;
+
+popup.style.left = left + 'px';
+popup.style.top = top + 'px';
+popup.style.transform = 'none';
     
       
     // 기존 차트 제거
