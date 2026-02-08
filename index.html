@@ -7111,29 +7111,29 @@ function showInlineGraph(title, labels, data, yLabel, color, isPercentage, isGra
     };
     
     if (isPercentage) {
-        yAxisConfig.beginAtZero = true;
-        yAxisConfig.max = 100;
-    } else if (isGrade) {
-        yAxisConfig.reverse = true;
-        yAxisConfig.min = 1;
-        yAxisConfig.max = 9;
-        yAxisConfig.ticks.stepSize = 1;
-    } else {
-        yAxisConfig.beginAtZero = true;
-        yAxisConfig.max = 100;
-    }
+    yAxisConfig.beginAtZero = true;
+    yAxisConfig.max = 100;
+} else if (isGrade) {
+    yAxisConfig.reverse = true;
+    yAxisConfig.min = 1;
+    yAxisConfig.max = 9;
+    yAxisConfig.ticks.stepSize = 1;
+} else {
+    yAxisConfig.min = 30;  // ⭐ 점수 그래프는 30점부터 시작
+    yAxisConfig.max = 100;
+}
     
     currentInlineChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: yLabel,
-                data: data,
-                borderColor: color,
-                backgroundColor: color.replace(')', ', 0.15)').replace('rgb', 'rgba'),
-                tension: 0.4,
-                fill: true,
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: yLabel,
+            data: data,
+            borderColor: color,
+            backgroundColor: color.replace(')', ', 0.15)').replace('rgb', 'rgba'),
+            tension: 0.4,
+            fill: isGrade ? 'origin' : true,  // ⭐ 등급 그래프는 origin 기준으로 채우기
                 pointRadius: 6,
                 pointHoverRadius: 8,
                 pointBackgroundColor: color,
