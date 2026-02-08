@@ -6016,8 +6016,20 @@ document.getElementById('studyPlanSection').style.display = 'block';
             
             tableHtml += '</tbody></table></div>';
             
-            tableHtml += '<div class="summary-table" style="margin-top: 30px;">';
+       tableHtml += '<div class="summary-table" style="margin-top: 30px;">';
 tableHtml += '<h3>📈 과목별 성취도 비율 현황</h3>';
+
+// ⭐ 그래프 영역 추가 ⭐
+tableHtml += '<div id="subjectGraphContainer" style="display: none; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 15px; padding: 25px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">';
+tableHtml += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">';
+tableHtml += '<h4 id="currentGraphTitle" style="color: #667eea; font-size: 1.2em; margin: 0;">📊 과목별 성취도 추이</h4>';
+tableHtml += '<button onclick="closeInlineGraph()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; font-weight: 600;">✖️ 닫기</button>';
+tableHtml += '</div>';
+tableHtml += '<div style="height: 300px; background: white; border-radius: 10px; padding: 15px;">';
+tableHtml += '<canvas id="inlineGraphCanvas"></canvas>';
+tableHtml += '</div>';
+tableHtml += '</div>';
+
 tableHtml += '<div style="overflow-x: auto;">';
 tableHtml += '<table class="grade-table" style="min-width: 900px; font-size: 0.75em;">';  // ⭐ 1200px → 900px
 tableHtml += '<thead><tr>';
@@ -6923,20 +6935,256 @@ function openGradeGraphClick(attendanceNumber) {
     }
     openGradeGraph(studentData, null);
 }
+
+// 인라인 그래프 변수
+var currentInlineChart = null;
+
+// 인라인 그래프 닫기
+function closeInlineGraph() {
+    document.getElementById('subjectGraphContainer').style.display = 'none';
+    if (currentInlineChart) {
+        currentInlineChart.destroy();
+        currentInlineChart = null;
+    }
+}
+
+// 과목별 인라인 그래프
+function openSubjectGraphClick(subjectName, attendanceNumber) {
+    var studentData = studentByNumber[attendanceNumber];
+    if (!studentData) {
+        alert('학생 데이터를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 과목명 매핑
+    var subjectMapping = {
+        '독서(인문,독서론)': ['독서(인문,독서론)', '독서(인문 이론)', '독서(인문이론)', '독서인문', '인문'],
+        '독서(사회)': ['독서(사회)', '독서사회', '사회'],
+        '독서(과학)': ['독서(과학)', '독서과학', '과학'],
+        '문학(현대시)': ['문학(현대시)', '문학현대시', '현대시', '현시'],
+        '문학(현대소설)': ['문학(현대소설)', '문학현대소설', '현대소설', '현소'],
+        '문학(고전시가)': ['문학(고전시가)', '문학고전시가', '고전시가', '고시'],
+        '문학(고전소설)': ['문학(고전소설)', '문학고전소설', '고전소설', '고소'],
+        '언어 화법': ['언어 화법', '언어화법', '화법'],
+        '매체 작문': ['매체 작문', '매체작문', '작문']
+    };
+    
+    var possibleNames = subjectMapping[subjectName] || [subjectName];
+    
+    // 데이터 수집
+    var labels = [];
+    var dataPoints = [];
+    
+    var allTests = window.discoveredTestSheets || [];
+    
+    allTests.forEach(function(testName) {
+        var gradeData = studentData.grades[testName];
+        if (!gradeData || !gradeData.ratios) return;
+        
+        var foundRatio = null;
+        for (var actualSubject in gradeData.ratios) {
+            for (var i = 0; i < possibleNames.length; i++) {
+                if (actualSubject === possibleNames[i] || 
+                    actualSubject.includes(possibleNames[i]) || 
+                    possibleNames[i].includes(actualSubject)) {
+                    foundRatio = gradeData.ratios[actualSubject];
+                    break;
+                }
+            }
+            if (foundRatio !== null) break;
+        }
+        
+        if (foundRatio !== null && foundRatio > 0) {
+            labels.push(testName);
+            dataPoints.push(foundRatio);
+        }
+    });
+    
+    if (dataPoints.length === 0) {
+        alert('해당 과목의 데이터가 없습니다.');
+        return;
+    }
+    
+    showInlineGraph(subjectName + ' 성취도 추이', labels, dataPoints, '성취도 (%)', '#667eea', true);
+}
+
+// 점수 인라인 그래프
+function openScoreGraphClick(attendanceNumber) {
+    var studentData = studentByNumber[attendanceNumber];
+    if (!studentData) {
+        alert('학생 데이터를 찾을 수 없습니다.');
+        return;
+    }
+    
+    var labels = [];
+    var scoreData = [];
+    
+    var allTests = window.discoveredTestSheets || [];
+    
+    allTests.forEach(function(testName) {
+        var gradeData = studentData.grades[testName];
+        if (!gradeData) return;
+        
+        labels.push(testName);
+        scoreData.push(gradeData.score || 0);
+    });
+    
+    if (scoreData.length === 0) {
+        alert('점수 데이터가 없습니다.');
+        return;
+    }
+    
+    showInlineGraph('점수 추이', labels, scoreData, '점수', '#667eea', false);
+}
+
+// 등급 인라인 그래프
+function openGradeGraphClick(attendanceNumber) {
+    var studentData = studentByNumber[attendanceNumber];
+    if (!studentData) {
+        alert('학생 데이터를 찾을 수 없습니다.');
+        return;
+    }
+    
+    var labels = [];
+    var gradeData = [];
+    
+    var allTests = window.discoveredTestSheets || [];
+    
+    allTests.forEach(function(testName) {
+        var gradeInfo = studentData.grades[testName];
+        if (!gradeInfo) return;
+        
+        var finalGrade = gradeInfo.grade;
+        if (!finalGrade || finalGrade === null || finalGrade === 'null' || finalGrade === 0) {
+            if (window.gradeCuts && window.gradeCuts[testName]) {
+                finalGrade = calculateGradeFromCut(gradeInfo.score, testName, gradeInfo.subjectType);
+            } else {
+                var percentile = calculatePercentile(gradeInfo.score, gradeInfo.subjectType, testName);
+                finalGrade = getGradeFromPercentile(percentile);
+            }
+        }
+        
+        labels.push(testName);
+        gradeData.push(parseInt(finalGrade));
+    });
+    
+    if (gradeData.length === 0) {
+        alert('등급 데이터가 없습니다.');
+        return;
+    }
+    
+    showInlineGraph('등급 추이', labels, gradeData, '등급', '#ef4444', false, true);
+}
+
+// 통합 인라인 그래프 표시 함수
+function showInlineGraph(title, labels, data, yLabel, color, isPercentage, isGrade) {
+    // 그래프 영역 표시
+    document.getElementById('subjectGraphContainer').style.display = 'block';
+    document.getElementById('currentGraphTitle').textContent = '📊 ' + title;
+    
+    // 그래프 영역으로 스크롤
+    document.getElementById('subjectGraphContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    // 기존 차트 제거
+    if (currentInlineChart) {
+        currentInlineChart.destroy();
+    }
+    
+    // 새 차트 생성
+    var ctx = document.getElementById('inlineGraphCanvas');
+    
+    var yAxisConfig = {
+        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+        ticks: {
+            font: { size: 11 },
+            callback: function(value) {
+                if (isPercentage) return value + '%';
+                if (isGrade) return value + '등급';
+                return value + '점';
+            }
+        },
+        title: {
+            display: true,
+            text: yLabel,
+            font: { size: 12, weight: 'bold' }
+        }
+    };
+    
+    if (isPercentage) {
+        yAxisConfig.beginAtZero = true;
+        yAxisConfig.max = 100;
+    } else if (isGrade) {
+        yAxisConfig.reverse = true;
+        yAxisConfig.min = 1;
+        yAxisConfig.max = 9;
+        yAxisConfig.ticks.stepSize = 1;
+    } else {
+        yAxisConfig.beginAtZero = true;
+        yAxisConfig.max = 100;
+    }
+    
+    currentInlineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: yLabel,
+                data: data,
+                borderColor: color,
+                backgroundColor: color.replace(')', ', 0.15)').replace('rgb', 'rgba'),
+                tension: 0.4,
+                fill: true,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBackgroundColor: color,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    callbacks: {
+                        label: function(context) {
+                            var value = context.parsed.y;
+                            if (isPercentage) return yLabel + ': ' + value + '%';
+                            if (isGrade) return yLabel + ': ' + value + '등급';
+                            return yLabel + ': ' + value + '점';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: yAxisConfig,
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 10 },
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    title: {
+                        display: true,
+                        text: '시험',
+                        font: { size: 12, weight: 'bold' }
+                    }
+                }
+            }
+        }
+    });
+}
         
     </script>
 
 </div>
     
-   <!-- 과목별 그래프 팝업 -->
-<div class="subject-graph-overlay" id="subjectGraphOverlay" onclick="closeSubjectGraph(event)">
-    <div class="subject-graph-popup" onclick="event.stopPropagation()">
-        <h3 id="subjectGraphTitle">📊 과목별 성취도 추이</h3>
-        <div class="subject-graph-canvas">
-            <canvas id="subjectGraphCanvas"></canvas>
-        </div>
-    </div>
-</div>
     
 </body>
 </html>
