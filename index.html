@@ -7111,29 +7111,48 @@ function showInlineGraph(title, labels, data, yLabel, color, isPercentage, isGra
     };
     
     if (isPercentage) {
-    yAxisConfig.beginAtZero = true;
-    yAxisConfig.max = 100;
-} else if (isGrade) {
-    yAxisConfig.reverse = true;
-    yAxisConfig.min = 1;
-    yAxisConfig.max = 9;
-    yAxisConfig.ticks.stepSize = 1;
-} else {
-    yAxisConfig.min = 30;  // ⭐ 점수 그래프는 30점부터 시작
-    yAxisConfig.max = 100;
-}
+        yAxisConfig.beginAtZero = true;
+        yAxisConfig.max = 100;
+    } else if (isGrade) {
+        yAxisConfig.reverse = true;
+        yAxisConfig.min = 1;
+        yAxisConfig.max = 9;
+        yAxisConfig.ticks.stepSize = 1;
+    } else {
+        yAxisConfig.min = 35;  // 점수 그래프는 20점부터 시작
+        yAxisConfig.max = 100;
+    }
+    
+    // ⭐ 등급 그래프일 때는 데이터를 뒤집어서 표시 ⭐
+    var chartData = data;
+    var fillConfig = true;
+    
+    if (isGrade) {
+        // 등급을 10에서 빼서 반전 (1등급 → 9, 9등급 → 1)
+        chartData = data.map(function(grade) {
+            return 10 - grade;
+        });
+        
+        // Y축 설정도 변경
+        yAxisConfig.reverse = false;  // 반전 해제
+        yAxisConfig.min = 1;
+        yAxisConfig.max = 9;
+        yAxisConfig.ticks.callback = function(value) {
+            return (10 - value) + '등급';  // 표시할 때는 다시 반전
+        };
+    }
     
     currentInlineChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: labels,
-        datasets: [{
-            label: yLabel,
-            data: data,
-            borderColor: color,
-            backgroundColor: color.replace(')', ', 0.15)').replace('rgb', 'rgba'),
-            tension: 0.4,
-            fill: isGrade ? 'origin' : true,  // ⭐ 등급 그래프는 origin 기준으로 채우기
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: yLabel,
+                data: chartData,
+                borderColor: color,
+                backgroundColor: color.replace(')', ', 0.15)').replace('rgb', 'rgba'),
+                tension: 0.4,
+                fill: fillConfig,
                 pointRadius: 6,
                 pointHoverRadius: 8,
                 pointBackgroundColor: color,
@@ -7154,8 +7173,12 @@ function showInlineGraph(title, labels, data, yLabel, color, isPercentage, isGra
                     callbacks: {
                         label: function(context) {
                             var value = context.parsed.y;
+                            if (isGrade) {
+                                // 툴팁에서는 원래 등급 값 표시
+                                var originalGrade = 10 - value;
+                                return yLabel + ': ' + originalGrade + '등급';
+                            }
                             if (isPercentage) return yLabel + ': ' + value + '%';
-                            if (isGrade) return yLabel + ': ' + value + '등급';
                             return yLabel + ': ' + value + '점';
                         }
                     }
