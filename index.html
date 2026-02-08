@@ -1905,7 +1905,16 @@ css
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
 }
-        
+
+  .subject-graph-canvas {
+        height: 300px;
+    }
+}
+                                     
+    </style>
+</head>
+<body>
+                                     
     </style>
 </head>
 <body>
@@ -5894,19 +5903,19 @@ tableHtml += '<h3>📈 과목별 성취도 비율 현황</h3>';
 tableHtml += '<div style="overflow-x: auto;">';
 tableHtml += '<table class="grade-table" style="min-width: 900px; font-size: 0.75em;">';  // ⭐ 1200px → 900px
 tableHtml += '<thead><tr>';
-tableHtml += '<th style="min-width: 60px; font-size: 0.8em;">시험</th>';          // ⭐ 80 → 60
-tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">선택과목</th>';      // ⭐ 80 → 65
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em;">점수</th>';          // ⭐ 50 → 40
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em;">등급</th>';          // ⭐ 50 → 40
-tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">인문,독서론</th>';    // ⭐ 80 → 65, 간략화
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">사회</th>';    // ⭐ 60 → 50
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">과학</th>';    // ⭐ 80 → 50
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">현대시</th>';        // ⭐ 80 → 55, 간략화
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">현대소설</th>';      // ⭐ 90 → 55, 간략화
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">고전시가</th>';      // ⭐ 90 → 55, 간략화
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em;">고전소설</th>';      // ⭐ 90 → 55, 간략화
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">언어화법</th>';      // ⭐ 70 → 50
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em;">매체작문</th>';      // ⭐ 70 → 50
+tableHtml += '<th style="min-width: 60px; font-size: 0.8em;">시험</th>';
+tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">선택과목</th>';
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openScoreGraph(studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">점수 📊</th>';
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openGradeGraph(studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">등급 📊</th>';
+tableHtml += '<th style="min-width: 65px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(인문,독서론)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">인문,독서론 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(사회)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">사회 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(과학)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">과학 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대시)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">현대시 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대소설)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">현대소설 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전시가)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">고전시가 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전소설)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">고전소설 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'언어 화법\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">언어화법 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'매체 작문\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">매체작문 📊</th>';
 tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
@@ -6370,7 +6379,361 @@ if (newComment) {
                     saveBtn.textContent = '💾 저장';
                 });
         }
+
+// 과목별 그래프 관련 변수
+var currentSubjectChart = null;
+
+// 과목별 그래프 팝업 열기
+function openSubjectGraph(subjectName, studentData) {
+    console.log('📊 그래프 열기:', subjectName);
+    
+    // 과목명 매핑
+    var subjectMapping = {
+        '독서(인문,독서론)': ['독서(인문,독서론)', '독서(인문 이론)', '독서(인문이론)', '독서인문', '인문'],
+        '독서(사회)': ['독서(사회)', '독서사회', '사회'],
+        '독서(과학)': ['독서(과학)', '독서과학', '과학'],
+        '문학(현대시)': ['문학(현대시)', '문학현대시', '현대시', '현시'],
+        '문학(현대소설)': ['문학(현대소설)', '문학현대소설', '현대소설', '현소'],
+        '문학(고전시가)': ['문학(고전시가)', '문학고전시가', '고전시가', '고시'],
+        '문학(고전소설)': ['문학(고전소설)', '문학고전소설', '고전소설', '고소'],
+        '언어 화법': ['언어 화법', '언어화법', '화법'],
+        '매체 작문': ['매체 작문', '매체작문', '작문']
+    };
+    
+    var possibleNames = subjectMapping[subjectName] || [subjectName];
+    
+    // 데이터 수집
+    var labels = [];
+    var dataPoints = [];
+    
+    var allTests = window.discoveredTestSheets || [];
+    
+    allTests.forEach(function(testName) {
+        var gradeData = studentData.grades[testName];
+        if (!gradeData || !gradeData.ratios) return;
+        
+        // 매칭되는 과목 찾기
+        var foundRatio = null;
+        for (var actualSubject in gradeData.ratios) {
+            for (var i = 0; i < possibleNames.length; i++) {
+                if (actualSubject === possibleNames[i] || 
+                    actualSubject.includes(possibleNames[i]) || 
+                    possibleNames[i].includes(actualSubject)) {
+                    foundRatio = gradeData.ratios[actualSubject];
+                    break;
+                }
+            }
+            if (foundRatio !== null) break;
+        }
+        
+        if (foundRatio !== null && foundRatio > 0) {
+            labels.push(testName);
+            dataPoints.push(foundRatio);
+        }
+    });
+    
+    if (dataPoints.length === 0) {
+        alert('해당 과목의 데이터가 없습니다.');
+        return;
+    }
+    
+    // 제목 설정
+    document.getElementById('subjectGraphTitle').textContent = '📊 ' + subjectName + ' 성취도 추이';
+    
+    // 팝업 표시
+    document.getElementById('subjectGraphOverlay').classList.add('active');
+    
+    // 기존 차트 제거
+    if (currentSubjectChart) {
+        currentSubjectChart.destroy();
+    }
+    
+    // 차트 생성
+    var ctx = document.getElementById('subjectGraphCanvas').getContext('2d');
+    currentSubjectChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '성취도 (%)',
+                data: dataPoints,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '성취도: ' + context.parsed.y + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '성취도 (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '시험'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 과목별 그래프 팝업 닫기
+function closeSubjectGraph(event) {
+    // 오버레이 클릭 시에만 닫기 (event가 있을 때)
+    if (event && event.target.id !== 'subjectGraphOverlay') {
+        return;
+    }
+    
+    document.getElementById('subjectGraphOverlay').classList.remove('active');
+    
+    // 차트 제거
+    if (currentSubjectChart) {
+        currentSubjectChart.destroy();
+        currentSubjectChart = null;
+    }
+}
+
+// 점수 그래프 팝업 열기
+function openScoreGraph(studentData) {
+    console.log('📊 점수 그래프 열기');
+    
+    var labels = [];
+    var scoreData = [];
+    
+    var allTests = window.discoveredTestSheets || [];
+    
+    allTests.forEach(function(testName) {
+        var gradeData = studentData.grades[testName];
+        if (!gradeData) return;
+        
+        labels.push(testName);
+        scoreData.push(gradeData.score || 0);
+    });
+    
+    if (scoreData.length === 0) {
+        alert('점수 데이터가 없습니다.');
+        return;
+    }
+    
+    // 제목 설정
+    document.getElementById('subjectGraphTitle').textContent = '📊 점수 추이';
+    
+    // 팝업 표시
+    document.getElementById('subjectGraphOverlay').classList.add('active');
+    
+    // 기존 차트 제거
+    if (currentSubjectChart) {
+        currentSubjectChart.destroy();
+    }
+    
+    // 차트 생성
+    var ctx = document.getElementById('subjectGraphCanvas').getContext('2d');
+    currentSubjectChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '점수',
+                data: scoreData,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '점수: ' + context.parsed.y + '점';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '점';
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '점수'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '시험'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 등급 그래프 팝업 열기
+function openGradeGraph(studentData) {
+    console.log('📊 등급 그래프 열기');
+    
+    var labels = [];
+    var gradeData = [];
+    
+    var allTests = window.discoveredTestSheets || [];
+    
+    allTests.forEach(function(testName) {
+        var gradeInfo = studentData.grades[testName];
+        if (!gradeInfo) return;
+        
+        var finalGrade = gradeInfo.grade;
+        if (!finalGrade || finalGrade === null || finalGrade === 'null' || finalGrade === 0) {
+            if (window.gradeCuts && window.gradeCuts[testName]) {
+                finalGrade = calculateGradeFromCut(gradeInfo.score, testName, gradeInfo.subjectType);
+            } else {
+                var percentile = calculatePercentile(gradeInfo.score, gradeInfo.subjectType, testName);
+                finalGrade = getGradeFromPercentile(percentile);
+            }
+        }
+        
+        labels.push(testName);
+        gradeData.push(parseInt(finalGrade));
+    });
+    
+    if (gradeData.length === 0) {
+        alert('등급 데이터가 없습니다.');
+        return;
+    }
+    
+    // 제목 설정
+    document.getElementById('subjectGraphTitle').textContent = '📊 등급 추이';
+    
+    // 팝업 표시
+    document.getElementById('subjectGraphOverlay').classList.add('active');
+    
+    // 기존 차트 제거
+    if (currentSubjectChart) {
+        currentSubjectChart.destroy();
+    }
+    
+    // 차트 생성
+    var ctx = document.getElementById('subjectGraphCanvas').getContext('2d');
+    currentSubjectChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '등급',
+                data: gradeData,
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#ef4444',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '등급: ' + context.parsed.y + '등급';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    reverse: true,
+                    min: 1,
+                    max: 9,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            return value + '등급';
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '등급 (낮을수록 좋음)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '시험'
+                    }
+                }
+            }
+        }
+    });
+}
         
     </script>
+
+    <!-- 과목별 그래프 팝업 -->
+<div class="subject-graph-overlay" id="subjectGraphOverlay" onclick="closeSubjectGraph(event)">
+    <div class="subject-graph-popup" onclick="event.stopPropagation()">
+        <h3 id="subjectGraphTitle">📊 과목별 성취도 추이</h3>
+        <div class="subject-graph-canvas">
+            <canvas id="subjectGraphCanvas"></canvas>
+        </div>
+        <button class="subject-graph-close" onclick="closeSubjectGraph()">✖️ 닫기</button>
+    </div>
+</div>
+    
 </body>
 </html>
