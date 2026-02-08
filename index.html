@@ -6530,6 +6530,9 @@ function openSubjectGraph(subjectName, studentData, event) {
     // 제목 설정
     document.getElementById('subjectGraphTitle').textContent = '📊 ' + subjectName + ' 성취도 추이';
     
+   // 팝업 표시 (먼저 표시해야 위치 계산 가능)
+    document.getElementById('subjectGraphOverlay').classList.add('active');
+    
     // 팝업 위치 설정
     var popup = document.querySelector('.subject-graph-popup');
     if (event) {
@@ -6555,9 +6558,6 @@ function openSubjectGraph(subjectName, studentData, event) {
         popup.style.left = left + 'px';
         popup.style.top = top + 'px';
     }
-    
-    // 팝업 표시
-    document.getElementById('subjectGraphOverlay').classList.add('active');
     
     // 기존 차트 제거
     if (currentSubjectChart) {
@@ -6663,6 +6663,9 @@ function openScoreGraph(studentData, event) {
     
     // 제목 설정
     document.getElementById('subjectGraphTitle').textContent = '📊 점수 추이';
+
+ // 팝업 표시
+    document.getElementById('subjectGraphOverlay').classList.add('active');
     
     // 팝업 위치 설정
     var popup = document.querySelector('.subject-graph-popup');
@@ -6690,9 +6693,7 @@ function openScoreGraph(studentData, event) {
         popup.style.top = top + 'px';
     }
     
-    // 팝업 표시
-    document.getElementById('subjectGraphOverlay').classList.add('active');
-    
+       
     // 기존 차트 제거
     if (currentSubjectChart) {
         currentSubjectChart.destroy();
@@ -6792,6 +6793,9 @@ function openGradeGraph(studentData, event) {
     
   // 제목 설정
     document.getElementById('subjectGraphTitle').textContent = '📊 등급 추이';
+
+  // 팝업 표시
+    document.getElementById('subjectGraphOverlay').classList.add('active');
     
     // 팝업 위치 설정
     var popup = document.querySelector('.subject-graph-popup');
@@ -6819,9 +6823,7 @@ function openGradeGraph(studentData, event) {
         popup.style.top = top + 'px';
     }
     
-    // 팝업 표시
-    document.getElementById('subjectGraphOverlay').classList.add('active');
-    
+      
     // 기존 차트 제거
     if (currentSubjectChart) {
         currentSubjectChart.destroy();
