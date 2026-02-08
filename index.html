@@ -1911,9 +1911,99 @@ css
     }
 }
                                      
-    </style>
-</head>
-<body>
+/* 과목별 그래프 팝업 스타일 */
+.subject-graph-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 99999;
+    animation: fadeIn 0.3s ease;
+}
+
+.subject-graph-overlay.active {
+    display: block;
+}
+
+.subject-graph-popup {
+    position: absolute;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: popIn 0.3s ease;
+}
+
+.subject-graph-popup h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.subject-graph-close {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: all 0.3s;
+}
+
+.subject-graph-close:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+.subject-graph-canvas {
+    width: 100%;
+    height: 400px;
+    margin: 20px 0;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popIn {
+    from { 
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+    .subject-graph-popup {
+        padding: 20px;
+        max-width: 95%;
+        max-height: 85%;
+    }
+    
+    .subject-graph-popup h3 {
+        font-size: 1.2em;
+    }
+    
+    .subject-graph-canvas {
+        height: 300px;
+    }
+}
                                      
     </style>
 </head>
@@ -5905,17 +5995,17 @@ tableHtml += '<table class="grade-table" style="min-width: 900px; font-size: 0.7
 tableHtml += '<thead><tr>';
 tableHtml += '<th style="min-width: 60px; font-size: 0.8em;">시험</th>';
 tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">선택과목</th>';
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openScoreGraph(studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">점수 📊</th>';
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openGradeGraph(studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">등급 📊</th>';
-tableHtml += '<th style="min-width: 65px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(인문,독서론)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">인문,독서론 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(사회)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">사회 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(과학)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">과학 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대시)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">현대시 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대소설)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">현대소설 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전시가)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">고전시가 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전소설)\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">고전소설 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'언어 화법\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">언어화법 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'매체 작문\', studentByNumber[\'' + student.attendanceNumber + '\'])" title="클릭하면 그래프 보기">매체작문 📊</th>';
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openScoreGraph(studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">점수 📊</th>';
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openGradeGraph(studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">등급 📊</th>';
+tableHtml += '<th style="min-width: 65px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(인문,독서론)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">인문,독서론 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(사회)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">사회 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(과학)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">과학 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대시)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">현대시 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대소설)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">현대소설 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전시가)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">고전시가 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전소설)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">고전소설 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'언어 화법\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">언어화법 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'매체 작문\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">매체작문 📊</th>';
 tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
@@ -6384,7 +6474,7 @@ if (newComment) {
 var currentSubjectChart = null;
 
 // 과목별 그래프 팝업 열기
-function openSubjectGraph(subjectName, studentData) {
+function openSubjectGraph(subjectName, studentData, event) {
     console.log('📊 그래프 열기:', subjectName);
     
     // 과목명 매핑
@@ -6439,6 +6529,32 @@ function openSubjectGraph(subjectName, studentData) {
     
     // 제목 설정
     document.getElementById('subjectGraphTitle').textContent = '📊 ' + subjectName + ' 성취도 추이';
+    
+    // 팝업 위치 설정
+    var popup = document.querySelector('.subject-graph-popup');
+    if (event) {
+        var clickX = event.clientX || event.pageX;
+        var clickY = event.clientY || event.pageY;
+        
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        
+        var popupWidth = 600;
+        var popupHeight = 500;
+        
+        var left = clickX + scrollLeft - (popupWidth / 2);
+        var top = clickY + scrollTop - 50;
+        
+        // 화면 밖으로 나가지 않도록
+        if (left < 20) left = 20;
+        if (left + popupWidth > window.innerWidth - 20) {
+            left = window.innerWidth - popupWidth - 20;
+        }
+        if (top < 20) top = 20;
+        
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
+    }
     
     // 팝업 표시
     document.getElementById('subjectGraphOverlay').classList.add('active');
@@ -6507,7 +6623,6 @@ function openSubjectGraph(subjectName, studentData) {
         }
     });
 }
-
 // 과목별 그래프 팝업 닫기
 function closeSubjectGraph(event) {
     // 오버레이 클릭 시에만 닫기 (event가 있을 때)
@@ -6525,7 +6640,7 @@ function closeSubjectGraph(event) {
 }
 
 // 점수 그래프 팝업 열기
-function openScoreGraph(studentData) {
+function openScoreGraph(studentData, event) {
     console.log('📊 점수 그래프 열기');
     
     var labels = [];
@@ -6548,6 +6663,32 @@ function openScoreGraph(studentData) {
     
     // 제목 설정
     document.getElementById('subjectGraphTitle').textContent = '📊 점수 추이';
+    
+    // 팝업 위치 설정
+    var popup = document.querySelector('.subject-graph-popup');
+    if (event) {
+        var clickX = event.clientX || event.pageX;
+        var clickY = event.clientY || event.pageY;
+        
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        
+        var popupWidth = 600;
+        var popupHeight = 500;
+        
+        var left = clickX + scrollLeft - (popupWidth / 2);
+        var top = clickY + scrollTop - 50;
+        
+        // 화면 밖으로 나가지 않도록
+        if (left < 20) left = 20;
+        if (left + popupWidth > window.innerWidth - 20) {
+            left = window.innerWidth - popupWidth - 20;
+        }
+        if (top < 20) top = 20;
+        
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
+    }
     
     // 팝업 표시
     document.getElementById('subjectGraphOverlay').classList.add('active');
@@ -6618,7 +6759,7 @@ function openScoreGraph(studentData) {
 }
 
 // 등급 그래프 팝업 열기
-function openGradeGraph(studentData) {
+function openGradeGraph(studentData, event) {
     console.log('📊 등급 그래프 열기');
     
     var labels = [];
@@ -6649,8 +6790,34 @@ function openGradeGraph(studentData) {
         return;
     }
     
-    // 제목 설정
+  // 제목 설정
     document.getElementById('subjectGraphTitle').textContent = '📊 등급 추이';
+    
+    // 팝업 위치 설정
+    var popup = document.querySelector('.subject-graph-popup');
+    if (event) {
+        var clickX = event.clientX || event.pageX;
+        var clickY = event.clientY || event.pageY;
+        
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        
+        var popupWidth = 600;
+        var popupHeight = 500;
+        
+        var left = clickX + scrollLeft - (popupWidth / 2);
+        var top = clickY + scrollTop - 50;
+        
+        // 화면 밖으로 나가지 않도록
+        if (left < 20) left = 20;
+        if (left + popupWidth > window.innerWidth - 20) {
+            left = window.innerWidth - popupWidth - 20;
+        }
+        if (top < 20) top = 20;
+        
+        popup.style.left = left + 'px';
+        popup.style.top = top + 'px';
+    }
     
     // 팝업 표시
     document.getElementById('subjectGraphOverlay').classList.add('active');
