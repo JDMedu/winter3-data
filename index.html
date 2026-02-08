@@ -1922,6 +1922,7 @@ css
     background: rgba(0, 0, 0, 0.7);
     z-index: 99999;
     animation: fadeIn 0.3s ease;
+    pointer-events: all;
 }
 
 .subject-graph-overlay.active {
@@ -1929,7 +1930,7 @@ css
 }
 
 .subject-graph-popup {
-    position: absolute;
+    position: fixed;
     background: white;
     border-radius: 20px;
     padding: 30px;
@@ -1937,6 +1938,7 @@ css
     width: 90%;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     animation: popIn 0.3s ease;
+    z-index: 100000;
 }
 
 .subject-graph-popup h3 {
