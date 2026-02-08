@@ -1931,36 +1931,50 @@ css
 
 .subject-graph-popup {
     position: fixed;
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    max-width: 600px;
-    width: 90%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 24px;
+    padding: 35px;
+    max-width: 500px;
+    width: 85%;
+    max-height: 80vh;
+    box-shadow: 0 15px 50px rgba(102, 126, 234, 0.25);
     animation: popIn 0.3s ease;
     z-index: 100000;
+    border: 2px solid rgba(102, 126, 234, 0.1);
 }
 
 .subject-graph-popup h3 {
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 1.5em;
+    color: #667eea;
+    margin-bottom: 25px;
+    font-size: 1.4em;
     display: flex;
     align-items: center;
     gap: 10px;
+    font-weight: 700;
+    text-align: center;
+    justify-content: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1);
 }
 
 .subject-graph-close {
-    background: #ef4444;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 12px 28px;
+    border-radius: 25px;
     cursor: pointer;
     font-size: 1em;
-    font-weight: bold;
+    font-weight: 600;
     margin-top: 20px;
     transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    width: 100%;
+}
+
+.subject-graph-close:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .subject-graph-close:hover {
@@ -1970,10 +1984,13 @@ css
 
 .subject-graph-canvas {
     width: 100%;
-    height: 400px;
+    height: 320px;
     margin: 20px 0;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -1993,17 +2010,18 @@ css
 /* 모바일 최적화 */
 @media (max-width: 768px) {
     .subject-graph-popup {
-        padding: 20px;
-        max-width: 95%;
-        max-height: 85%;
+        padding: 25px 20px;
+        max-width: 92%;
+        max-height: 75vh;
     }
     
     .subject-graph-popup h3 {
-        font-size: 1.2em;
+        font-size: 1.1em;
     }
     
     .subject-graph-canvas {
-        height: 300px;
+        height: 260px;
+        padding: 10px;
     }
 }
                                      
@@ -6539,94 +6557,135 @@ function openSubjectGraph(subjectName, studentData, event) {
     // 제목 설정
     document.getElementById('subjectGraphTitle').textContent = '📊 ' + subjectName + ' 성취도 추이';
     
-   // 팝업 표시 (먼저 표시해야 위치 계산 가능)
-    document.getElementById('subjectGraphOverlay').classList.add('active');
+    // 팝업 표시
+    var overlay = document.getElementById('subjectGraphOverlay');
+    overlay.style.display = 'block';
+    setTimeout(function() {
+        overlay.classList.add('active');
+    }, 10);
     
     // 팝업 위치 설정 (화면 중앙)
-var popup = document.querySelector('.subject-graph-popup');
-
-// 화면 중앙에 고정
-var windowWidth = window.innerWidth;
-var windowHeight = window.innerHeight;
-var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-var popupWidth = 600;
-var popupHeight = 500;
-
-var left = (windowWidth - popupWidth) / 2;
-var top = scrollTop + (windowHeight - popupHeight) / 2;
-
-// 최소 여백 확보
-if (left < 20) left = 20;
-if (top < scrollTop + 20) top = scrollTop + 20;
-
-popup.style.left = left + 'px';
-popup.style.top = top + 'px';
-popup.style.transform = 'none';
+    var popup = document.querySelector('.subject-graph-popup');
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    var popupWidth = Math.min(500, windowWidth * 0.85);
+    var popupHeight = Math.min(450, windowHeight * 0.75);
+    
+    var left = (windowWidth - popupWidth) / 2;
+    var top = scrollTop + (windowHeight - popupHeight) / 2;
+    
+    if (left < 20) left = 20;
+    if (top < scrollTop + 20) top = scrollTop + 20;
+    
+    popup.style.left = left + 'px';
+    popup.style.top = top + 'px';
+    popup.style.transform = 'none';
     
     // 기존 차트 제거
     if (currentSubjectChart) {
         currentSubjectChart.destroy();
     }
     
-    // 차트 생성
-    var ctx = document.getElementById('subjectGraphCanvas').getContext('2d');
-    currentSubjectChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: '성취도 (%)',
-                data: dataPoints,
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-                pointBackgroundColor: '#667eea',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return '성취도: ' + context.parsed.y + '%';
+    // 차트 생성 (약간의 지연을 주어 DOM이 완전히 렌더링되도록)
+    setTimeout(function() {
+        var ctx = document.getElementById('subjectGraphCanvas');
+        if (!ctx) {
+            console.error('캔버스를 찾을 수 없습니다!');
+            return;
+        }
+        
+        currentSubjectChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '성취도 (%)',
+                    data: dataPoints,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return '성취도: ' + context.parsed.y + '%';
+                            }
                         }
                     }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: {
-                        callback: function(value) {
-                            return value + '%';
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: '성취도 (%)',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
                         }
                     },
-                    title: {
-                        display: true,
-                        text: '성취도 (%)'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: '시험'
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        title: {
+                            display: true,
+                            text: '시험',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+    }, 100);
 }
 // 과목별 그래프 팝업 닫기
 function closeSubjectGraph(event) {
