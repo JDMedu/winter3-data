@@ -1913,7 +1913,7 @@ css
                                      
 /* 과목별 그래프 팝업 스타일 */
 .subject-graph-overlay {
-    display: none;
+    display: none !important;  /* ⭐ !important 추가 ⭐ */
     position: fixed;
     top: 0;
     left: 0;
@@ -1926,7 +1926,7 @@ css
 }
 
 .subject-graph-overlay.active {
-    display: block;
+    display: block !important;  /* ⭐ 여기도 !important 추가 ⭐ */
 }
 
 .subject-graph-popup {
@@ -6303,6 +6303,13 @@ tableHtml += '</tr></thead><tbody>';
             }
             
             updateStudentTab();
+            
+var overlay = document.getElementById('subjectGraphOverlay');
+    if (overlay) {
+        overlay.classList.remove('active');
+        overlay.style.display = 'none';
+    }
+            
         };
 
  /* ⭐ 여기부터 추가 ⭐ */
