@@ -1919,7 +1919,7 @@ css
                                      
 /* 과목별 그래프 팝업 스타일 */
 .subject-graph-overlay {
-    display: none !important;  /* ⭐ !important 추가 ⭐ */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -1929,14 +1929,15 @@ css
     z-index: 99999;
     animation: fadeIn 0.3s ease;
     pointer-events: all;
+    align-items: center;
+    justify-content: center;
 }
-
 .subject-graph-overlay.active {
     display: block !important;  /* ⭐ 여기도 !important 추가 ⭐ */
 }
 
 .subject-graph-popup {
-    position: fixed;
+    position: relative;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     border-radius: 24px;
     padding: 35px;
@@ -1947,6 +1948,7 @@ css
     animation: popIn 0.3s ease;
     z-index: 100000;
     border: 2px solid rgba(102, 126, 234, 0.1);
+    margin: auto;
 }
 
 .subject-graph-popup h3 {
@@ -6570,25 +6572,7 @@ function openSubjectGraph(subjectName, studentData, event) {
         overlay.classList.add('active');
     }, 10);
     
-    // 팝업 위치 설정 (화면 중앙)
-    var popup = document.querySelector('.subject-graph-popup');
-    var windowWidth = window.innerWidth;
-    var windowHeight = window.innerHeight;
-    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    
-    var popupWidth = Math.min(500, windowWidth * 0.85);
-    var popupHeight = Math.min(450, windowHeight * 0.75);
-    
-    var left = (windowWidth - popupWidth) / 2;
-    var top = scrollTop + (windowHeight - popupHeight) / 2;
-    
-    if (left < 20) left = 20;
-    if (top < scrollTop + 20) top = scrollTop + 20;
-    
-    popup.style.left = left + 'px';
-    popup.style.top = top + 'px';
-    popup.style.transform = 'none';
-    
+       
     // 기존 차트 제거
     if (currentSubjectChart) {
         currentSubjectChart.destroy();
@@ -6737,28 +6721,7 @@ function openScoreGraph(studentData, event) {
  // 팝업 표시
     document.getElementById('subjectGraphOverlay').classList.add('active');
     
-    // 팝업 위치 설정 (화면 중앙)
-var popup = document.querySelector('.subject-graph-popup');
-
-// 화면 중앙에 고정
-var windowWidth = window.innerWidth;
-var windowHeight = window.innerHeight;
-var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-var popupWidth = 600;
-var popupHeight = 500;
-
-var left = (windowWidth - popupWidth) / 2;
-var top = scrollTop + (windowHeight - popupHeight) / 2;
-
-// 최소 여백 확보
-if (left < 20) left = 20;
-if (top < scrollTop + 20) top = scrollTop + 20;
-
-popup.style.left = left + 'px';
-popup.style.top = top + 'px';
-popup.style.transform = 'none';
-    
+       
        
     // 기존 차트 제거
     if (currentSubjectChart) {
@@ -6863,27 +6826,7 @@ function openGradeGraph(studentData, event) {
   // 팝업 표시
     document.getElementById('subjectGraphOverlay').classList.add('active');
     
-   // 팝업 위치 설정 (화면 중앙)
-var popup = document.querySelector('.subject-graph-popup');
-
-// 화면 중앙에 고정
-var windowWidth = window.innerWidth;
-var windowHeight = window.innerHeight;
-var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-var popupWidth = 600;
-var popupHeight = 500;
-
-var left = (windowWidth - popupWidth) / 2;
-var top = scrollTop + (windowHeight - popupHeight) / 2;
-
-// 최소 여백 확보
-if (left < 20) left = 20;
-if (top < scrollTop + 20) top = scrollTop + 20;
-
-popup.style.left = left + 'px';
-popup.style.top = top + 'px';
-popup.style.transform = 'none';
+   
     
       
     // 기존 차트 제거
@@ -6992,7 +6935,6 @@ function openGradeGraphClick(attendanceNumber) {
         <div class="subject-graph-canvas">
             <canvas id="subjectGraphCanvas"></canvas>
         </div>
-        <button class="subject-graph-close" onclick="closeSubjectGraph()">✖️ 닫기</button>
     </div>
 </div>
     
