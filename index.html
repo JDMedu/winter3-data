@@ -36,6 +36,12 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
+/* 테이블 헤더 호버 효과 */
+.grade-table th[onclick]:hover {
+    background: rgba(102, 126, 234, 0.2) !important;
+    transform: scale(1.05);
+}
         
         .header {
             text-align: center;
@@ -6015,17 +6021,17 @@ tableHtml += '<table class="grade-table" style="min-width: 900px; font-size: 0.7
 tableHtml += '<thead><tr>';
 tableHtml += '<th style="min-width: 60px; font-size: 0.8em;">시험</th>';
 tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">선택과목</th>';
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openScoreGraph(studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">점수 📊</th>';
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openGradeGraph(studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">등급 📊</th>';
-tableHtml += '<th style="min-width: 65px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(인문,독서론)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">인문,독서론 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(사회)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">사회 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'독서(과학)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">과학 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대시)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">현대시 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(현대소설)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">현대소설 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전시가)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">고전시가 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'문학(고전소설)\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">고전소설 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'언어 화법\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">언어화법 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s;" onclick="openSubjectGraph(\'매체 작문\', studentByNumber[\'' + student.attendanceNumber + '\'], event)" title="클릭하면 그래프 보기">매체작문 📊</th>';
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.1);" onclick="openScoreGraphClick(\'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">점수 📊</th>';
+tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(239, 68, 68, 0.1);" onclick="openGradeGraphClick(\'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">등급 📊</th>';
+tableHtml += '<th style="min-width: 65px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(인문,독서론)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">인문,독서론 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(사회)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">사회 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(과학)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">과학 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(현대시)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">현대시 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(현대소설)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">현대소설 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(고전시가)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">고전시가 📊</th>';
+tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(고전소설)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">고전소설 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'언어 화법\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">언어화법 📊</th>';
+tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'매체 작문\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">매체작문 📊</th>';
 tableHtml += '</tr></thead><tbody>';
             
             for (var i = 0; i < allTests.length; i++) {
@@ -6946,12 +6952,40 @@ popup.style.transform = 'none';
         }
     });
 }
+
+// 클릭 이벤트 래퍼 함수들
+function openSubjectGraphClick(subjectName, attendanceNumber) {
+    var studentData = studentByNumber[attendanceNumber];
+    if (!studentData) {
+        alert('학생 데이터를 찾을 수 없습니다.');
+        return;
+    }
+    openSubjectGraph(subjectName, studentData, null);
+}
+
+function openScoreGraphClick(attendanceNumber) {
+    var studentData = studentByNumber[attendanceNumber];
+    if (!studentData) {
+        alert('학생 데이터를 찾을 수 없습니다.');
+        return;
+    }
+    openScoreGraph(studentData, null);
+}
+
+function openGradeGraphClick(attendanceNumber) {
+    var studentData = studentByNumber[attendanceNumber];
+    if (!studentData) {
+        alert('학생 데이터를 찾을 수 없습니다.');
+        return;
+    }
+    openGradeGraph(studentData, null);
+}
         
     </script>
 
 </div>
     
-    <!-- 과목별 그래프 팝업 -->
+   <!-- 과목별 그래프 팝업 -->
 <div class="subject-graph-overlay" id="subjectGraphOverlay" onclick="closeSubjectGraph(event)">
     <div class="subject-graph-popup" onclick="event.stopPropagation()">
         <h3 id="subjectGraphTitle">📊 과목별 성취도 추이</h3>
