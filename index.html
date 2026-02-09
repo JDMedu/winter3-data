@@ -5584,13 +5584,7 @@ function calculateGradeFromCut(score, testName, subjectType) {
                 }
             }
             
-            testSheetNames.sort(function(a, b) {
-                var numA = parseInt(a.match(/\d+/));
-                var numB = parseInt(b.match(/\d+/));
-                return numA - numB;
-            });
-            
-            console.log('발견된 모클 시트들:', testSheetNames);
+            console.log('발견된 모클 시트들 (시트 순서):', testSheetNames);
             
            // ⭐⭐⭐ 5-1. 등급컷 추출 (만점 추출 전에!) ⭐⭐⭐
 console.log('=== 등급컷 추출 시작 ===');
