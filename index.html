@@ -5955,23 +5955,24 @@ function extractMaxScoreswinter3(workbook, testSheetNames) {
 document.getElementById('studyPlanSection').style.display = 'block';
         }
 
-        function displaySummaryTable(student) {
-            var summaryTableDiv = document.getElementById('summaryTable');
-            
-            var allTests = window.discoveredTestSheets || ['모클1회', '모클2회', '모클3회'];
-            var totalTests = allTests.length;
-            
-            var tableHtml = '<div class="summary-table">';
-            tableHtml += '<h3>📊 전체 성적 현황 (고3 - ' + totalTests + '개 시험)</h3>';
-            tableHtml += '<table class="grade-table">';
-            tableHtml += '<thead><tr>';
-            tableHtml += '<th class="test-name">시험</th>';
-            tableHtml += '<th>선택과목</th>';
-            tableHtml += '<th>점수</th>';      // ✅ 점수만 남김
-            tableHtml += '<th>등급</th>';
-            tableHtml += '</tr></thead><tbody>';
-            
-           for (var i = 0; i < allTests.length; i++) {
+function displaySummaryTable(student) {
+    var summaryTableDiv = document.getElementById('summaryTable');
+    
+    var allTests = window.discoveredTestSheets || ['모클1회', '모클2회', '모클3회'];
+    var totalTests = allTests.length;
+    
+    var tableHtml = '<div class="summary-table">';
+    tableHtml += '<h3>📊 전체 성적 현황 (고3 - ' + totalTests + '개 시험)</h3>';
+    tableHtml += '<table class="grade-table">';
+    tableHtml += '<thead><tr>';
+    tableHtml += '<th class="test-name">시험</th>';
+    tableHtml += '<th>선택과목</th>';
+    tableHtml += '<th>점수</th>';
+    tableHtml += '<th>등급</th>';
+    tableHtml += '</tr></thead><tbody>';
+    
+    // 첫 번째 테이블: 전체 성적 (개별 표시)
+    for (var i = 0; i < allTests.length; i++) {
         var testName = allTests[i];
         var gradeData = student.grades[testName];
         
@@ -5979,137 +5980,221 @@ document.getElementById('studyPlanSection').style.display = 'block';
         
         tableHtml += '<tr>';
         tableHtml += '<td class="test-name">' + testName + '</td>';
-                
-                var subjectTypeClass = (gradeData.subjectType || '').replace(/\s/g, '_');
-                tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
-                tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
-                
-               // 등급 계산 및 표시 (시험 이름 전달)
-            var testPercentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
-            var testGrade = getGradeFromPercentile(testPercentile);
-                tableHtml += '<td class="grade-cell grade-' + testGrade + '">' + testGrade + '</td>';
-                                
-                tableHtml += '</tr>';
+        
+        var subjectTypeClass = (gradeData.subjectType || '').replace(/\s/g, '_');
+        tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
+        tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
+        
+        var testPercentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+        var testGrade = getGradeFromPercentile(testPercentile);
+        tableHtml += '<td class="grade-cell grade-' + testGrade + '">' + testGrade + '</td>';
+        
+        tableHtml += '</tr>';
+    }
+    
+    tableHtml += '</tbody></table></div>';
+    
+    // ========== 두 번째 테이블: 과목별 성취도 (그룹화 적용) ==========
+    tableHtml += '<div class="summary-table" style="margin-top: 30px;">';
+    tableHtml += '<h3>📈 과목별 성취도 비율 현황</h3>';
+    
+    // 그래프 영역 추가
+    tableHtml += '<div id="subjectGraphContainer" style="display: none; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 15px; padding: 25px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">';
+    tableHtml += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">';
+    tableHtml += '<h4 id="currentGraphTitle" style="color: #667eea; font-size: 1.2em; margin: 0;">📊 과목별 성취도 추이</h4>';
+    tableHtml += '<button onclick="closeInlineGraph()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; font-weight: 600;">✖️ 닫기</button>';
+    tableHtml += '</div>';
+    tableHtml += '<div style="height: 300px; background: white; border-radius: 10px; padding: 15px;">';
+    tableHtml += '<canvas id="inlineGraphCanvas"></canvas>';
+    tableHtml += '</div>';
+    tableHtml += '</div>';
+    
+    tableHtml += '<div style="overflow-x: auto;">';
+    tableHtml += '<table class="grade-table" style="min-width: 900px; font-size: 0.75em;">';
+    tableHtml += '<thead><tr>';
+    tableHtml += '<th style="min-width: 60px; font-size: 0.8em;">시험</th>';
+    tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">선택과목</th>';
+    tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.1);" onclick="openScoreGraphClick(\'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">점수 📊</th>';
+    tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(239, 68, 68, 0.1);" onclick="openGradeGraphClick(\'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">등급 📊</th>';
+    tableHtml += '<th style="min-width: 65px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(인문,독서론)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">인문,독서론 📊</th>';
+    tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(사회)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">사회 📊</th>';
+    tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(과학)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">과학 📊</th>';
+    tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(현대시)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">현대시 📊</th>';
+    tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(현대소설)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">현대소설 📊</th>';
+    tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(고전시가)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">고전시가 📊</th>';
+    tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(고전소설)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">고전소설 📊</th>';
+    tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'언어 화법\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">언어화법 📊</th>';
+    tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'매체 작문\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">매체작문 📊</th>';
+    tableHtml += '</tr></thead><tbody>';
+    
+    // ⭐ 데이터 그룹화 ⭐
+    var recentCount = 10;
+    var oldTests = totalTests > recentCount ? allTests.slice(0, totalTests - recentCount) : [];
+    var recentTests = totalTests > recentCount ? allTests.slice(totalTests - recentCount) : allTests;
+    
+    var groupSize = 1;
+    if (oldTests.length > 20) {
+        groupSize = 3;
+    } else if (oldTests.length > 10) {
+        groupSize = 2;
+    }
+    
+    var groupedTests = [];
+    
+    // 1. 오래된 시험 묶기
+    for (var i = 0; i < oldTests.length; i += groupSize) {
+        var group = {
+            tests: [],
+            label: ''
+        };
+        
+        for (var j = i; j < Math.min(i + groupSize, oldTests.length); j++) {
+            var testName = oldTests[j];
+            var gradeData = student.grades[testName];
+            if (gradeData) {
+                group.tests.push({
+                    name: testName,
+                    data: gradeData
+                });
             }
-            
-            tableHtml += '</tbody></table></div>';
-            
-       tableHtml += '<div class="summary-table" style="margin-top: 30px;">';
-tableHtml += '<h3>📈 과목별 성취도 비율 현황</h3>';
-
-// ⭐ 그래프 영역 추가 ⭐
-tableHtml += '<div id="subjectGraphContainer" style="display: none; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 15px; padding: 25px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">';
-tableHtml += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">';
-tableHtml += '<h4 id="currentGraphTitle" style="color: #667eea; font-size: 1.2em; margin: 0;">📊 과목별 성취도 추이</h4>';
-tableHtml += '<button onclick="closeInlineGraph()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.9em; font-weight: 600;">✖️ 닫기</button>';
-tableHtml += '</div>';
-tableHtml += '<div style="height: 300px; background: white; border-radius: 10px; padding: 15px;">';
-tableHtml += '<canvas id="inlineGraphCanvas"></canvas>';
-tableHtml += '</div>';
-tableHtml += '</div>';
-
-tableHtml += '<div style="overflow-x: auto;">';
-tableHtml += '<table class="grade-table" style="min-width: 900px; font-size: 0.75em;">';  // ⭐ 1200px → 900px
-tableHtml += '<thead><tr>';
-tableHtml += '<th style="min-width: 60px; font-size: 0.8em;">시험</th>';
-tableHtml += '<th style="min-width: 65px; font-size: 0.8em;">선택과목</th>';
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.1);" onclick="openScoreGraphClick(\'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">점수 📊</th>';
-tableHtml += '<th style="min-width: 40px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(239, 68, 68, 0.1);" onclick="openGradeGraphClick(\'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">등급 📊</th>';
-tableHtml += '<th style="min-width: 65px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(인문,독서론)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">인문,독서론 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(사회)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">사회 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'독서(과학)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">과학 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(현대시)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">현대시 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(현대소설)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">현대소설 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(고전시가)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">고전시가 📊</th>';
-tableHtml += '<th style="min-width: 55px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'문학(고전소설)\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">고전소설 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'언어 화법\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">언어화법 📊</th>';
-tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'매체 작문\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">매체작문 📊</th>';
-tableHtml += '</tr></thead><tbody>';
-            
-            for (var i = 0; i < allTests.length; i++) {
-                    var testName = allTests[i];
-                    var gradeData = student.grades[testName];
-                    
-                    // 미응시한 시험은 건너뛰기
-                    if (!gradeData) continue;
-                    
-                    tableHtml += '<tr>';
-                    tableHtml += '<td class="test-name" style="font-size: 0.85em;">' + testName + '</td>';
-                   var subjectTypeClass2 = (gradeData.subjectType || '').replace(/\s/g, '_');
-                    tableHtml += '<td class="source-cell" style="font-size: 0.85em;"><span class="subject-type ' + subjectTypeClass2 + '">' + (gradeData.subjectType || '-') + '</span></td>';
-                    tableHtml += '<td class="score-cell" style="font-size: 0.85em;">' + gradeData.score + '</td>';
-                    
-                    // 등급 계산 및 표시 (시험 이름 전달)
-                    var testPercentile2 = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
-                    var testGrade2 = getGradeFromPercentile(testPercentile2);
-                    tableHtml += '<td class="grade-cell grade-' + testGrade2 + '" style="font-size: 0.85em;">' + testGrade2 + '</td>';
-                    
-                    var subjectOrder = ['독서(인문,독서론)', '독서(사회)', '독서(과학)', 
-                                       '문학(현대시)', '문학(현대소설)', '문학(고전시가)', '문학(고전소설)',
-                                       '언어 화법', '매체 작문'];
-                    
-                    for (var j = 0; j < subjectOrder.length; j++) {
-                        var targetSubject = subjectOrder[j];
-                        var ratio = 0;
-                        
-                        // 과목명 매핑 테이블
-                        var subjectMapping = {
-                            '독서(인문,독서론)': ['독서(인문,독서론)', '독서(인문 이론)', '독서(인문이론)', '독서인문', '인문'],
-                            '독서(사회)': ['독서(사회)', '독서사회', '사회'],
-                            '독서(과학)': ['독서(과학)', '독서과학', '과학'],
-                            '문학(현대시)': ['문학(현대시)', '문학현대시', '현대시', '현시'],
-                            '문학(현대소설)': ['문학(현대소설)', '문학현대소설', '현대소설', '현소'],
-                            '문학(고전시가)': ['문학(고전시가)', '문학고전시가', '고전시가', '고시'],
-                            '문학(고전소설)': ['문학(고전소설)', '문학고전소설', '고전소설', '고소'],
-                            '언어 화법': ['언어 화법', '언어화법', '화법'],
-                            '매체 작문': ['매체 작문', '매체작문', '작문']
-                        };
-                        
-                        // 매칭되는 과목 찾기
-                        var possibleNames = subjectMapping[targetSubject] || [targetSubject];
-                        
-                        for (var actualSubject in gradeData.ratios) {
-                            var found = false;
-                            
-                            // 정확한 매칭 우선
-                            for (var k = 0; k < possibleNames.length; k++) {
-                                if (actualSubject === possibleNames[k]) {
-                                    ratio = gradeData.ratios[actualSubject] || 0;
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            
-                            // 정확한 매칭이 없으면 부분 매칭
-                            if (!found) {
-                                for (var k = 0; k < possibleNames.length; k++) {
-                                    if (actualSubject.includes(possibleNames[k]) || possibleNames[k].includes(actualSubject)) {
-                                        ratio = gradeData.ratios[actualSubject] || 0;
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            
-                            if (found) break;
-                        }
-                        
-                        var ratioColor = ratio >= 90 ? '#e74c3c' : ratio >= 80 ? '#f39c12' : ratio >= 70 ? '#f1c40f' : 
-                                        ratio >= 60 ? '#2ecc71' : ratio >= 50 ? '#3498db' : '#95a5a6';
-                        var ratioText = ratio > 0 ? ratio + '%' : '-';
-                        
-                        tableHtml += '<td style="color: ' + ratioColor + '; font-weight: bold; text-align: center; font-size: 0.85em;">' + ratioText + '</td>';
-                    }
-                    
-                   
-                
-                tableHtml += '</tr>';
-            }
-            
-            tableHtml += '</tbody></table></div></div>';
-            
-            summaryTableDiv.innerHTML = tableHtml;
         }
+        
+        if (group.tests.length > 0) {
+            if (groupSize === 1) {
+                group.label = group.tests[0].name;
+            } else {
+                var firstNum = group.tests[0].name.match(/(\d+)회/);
+                var lastNum = group.tests[group.tests.length - 1].name.match(/(\d+)회/);
+                if (firstNum && lastNum) {
+                    group.label = firstNum[1] + '-' + lastNum[1] + '회 평균';
+                } else {
+                    group.label = group.tests.map(t => t.name).join(', ');
+                }
+            }
+            
+            groupedTests.push(group);
+        }
+    }
+    
+    // 2. 최근 10개는 개별 추가
+    for (var i = 0; i < recentTests.length; i++) {
+        var testName = recentTests[i];
+        var gradeData = student.grades[testName];
+        
+        if (gradeData) {
+            groupedTests.push({
+                tests: [{
+                    name: testName,
+                    data: gradeData
+                }],
+                label: testName
+            });
+        }
+    }
+    
+    // ⭐ 그룹별 평균 데이터 표시 ⭐
+    for (var g = 0; g < groupedTests.length; g++) {
+        var group = groupedTests[g];
+        
+        tableHtml += '<tr>';
+        tableHtml += '<td class="test-name" style="font-size: 0.85em;">' + group.label + '</td>';
+        
+        // 선택과목
+        var subjectTypes = {};
+        group.tests.forEach(function(test) {
+            var type = test.data.subjectType || '-';
+            subjectTypes[type] = (subjectTypes[type] || 0) + 1;
+        });
+        var mostCommonType = Object.keys(subjectTypes).sort(function(a, b) {
+            return subjectTypes[b] - subjectTypes[a];
+        })[0];
+        
+        var subjectTypeClass2 = (mostCommonType || '').replace(/\s/g, '_');
+        tableHtml += '<td class="source-cell" style="font-size: 0.85em;"><span class="subject-type ' + subjectTypeClass2 + '">' + mostCommonType + '</span></td>';
+        
+        // 평균 점수
+        var totalScore = 0;
+        var scoreCount = 0;
+        group.tests.forEach(function(test) {
+            if (test.data.score) {
+                totalScore += test.data.score;
+                scoreCount++;
+            }
+        });
+        var avgScore = scoreCount > 0 ? Math.round(totalScore / scoreCount) : 0;
+        tableHtml += '<td class="score-cell" style="font-size: 0.85em;">' + avgScore + '</td>';
+        
+        // 평균 등급
+        var totalGrade = 0;
+        var gradeCount = 0;
+        group.tests.forEach(function(test) {
+            var testPercentile = calculatePercentile(test.data.score, test.data.subjectType, test.name);
+            var testGrade = getGradeFromPercentile(testPercentile);
+            if (testGrade) {
+                totalGrade += testGrade;
+                gradeCount++;
+            }
+        });
+        var avgGrade = gradeCount > 0 ? Math.round(totalGrade / gradeCount) : 9;
+        tableHtml += '<td class="grade-cell grade-' + avgGrade + '" style="font-size: 0.85em;">' + avgGrade + '</td>';
+        
+        // 과목별 평균 성취도
+        var subjectOrder = ['독서(인문,독서론)', '독서(사회)', '독서(과학)', 
+                           '문학(현대시)', '문학(현대소설)', '문학(고전시가)', '문학(고전소설)',
+                           '언어 화법', '매체 작문'];
+        
+        for (var s = 0; s < subjectOrder.length; s++) {
+            var targetSubject = subjectOrder[s];
+            var subjectMapping = {
+                '독서(인문,독서론)': ['독서(인문,독서론)', '독서(인문 이론)', '독서(인문이론)', '독서인문', '인문'],
+                '독서(사회)': ['독서(사회)', '독서사회', '사회'],
+                '독서(과학)': ['독서(과학)', '독서과학', '과학'],
+                '문학(현대시)': ['문학(현대시)', '문학현대시', '현대시', '현시'],
+                '문학(현대소설)': ['문학(현대소설)', '문학현대소설', '현대소설', '현소'],
+                '문학(고전시가)': ['문학(고전시가)', '문학고전시가', '고전시가', '고시'],
+                '문학(고전소설)': ['문학(고전소설)', '문학고전소설', '고전소설', '고소'],
+                '언어 화법': ['언어 화법', '언어화법', '화법'],
+                '매체 작문': ['매체 작문', '매체작문', '작문']
+            };
+            
+            var possibleNames = subjectMapping[targetSubject] || [targetSubject];
+            
+            var totalRatio = 0;
+            var ratioCount = 0;
+            
+            group.tests.forEach(function(test) {
+                for (var actualSubject in test.data.ratios) {
+                    var found = false;
+                    for (var k = 0; k < possibleNames.length; k++) {
+                        if (actualSubject === possibleNames[k] || 
+                            actualSubject.includes(possibleNames[k]) || 
+                            possibleNames[k].includes(actualSubject)) {
+                            totalRatio += test.data.ratios[actualSubject] || 0;
+                            ratioCount++;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) break;
+                }
+            });
+            
+            var avgRatio = ratioCount > 0 ? Math.round(totalRatio / ratioCount) : 0;
+            
+            var ratioColor = avgRatio >= 90 ? '#e74c3c' : avgRatio >= 80 ? '#f39c12' : avgRatio >= 70 ? '#f1c40f' : 
+                            avgRatio >= 60 ? '#2ecc71' : avgRatio >= 50 ? '#3498db' : '#95a5a6';
+            var ratioText = avgRatio > 0 ? avgRatio + '%' : '-';
+            
+            tableHtml += '<td style="color: ' + ratioColor + '; font-weight: bold; text-align: center; font-size: 0.85em;">' + ratioText + '</td>';
+        }
+        
+        tableHtml += '</tr>';
+    }
+    
+    tableHtml += '</tbody></table></div></div>';
+    
+    summaryTableDiv.innerHTML = tableHtml;
+}
 
         function displayGrades(grades) {
             var gradeCardsDiv = document.getElementById('gradeCards');
