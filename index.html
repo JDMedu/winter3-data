@@ -6043,42 +6043,42 @@ function displaySummaryTable(student) {
     
     // 1. 오래된 시험 묶기
     for (var i = 0; i < oldTests.length; i += groupSize) {
-        var group = {
-            tests: [],
-            label: ''
-        };
-        
-        for (var j = i; j < Math.min(i + groupSize, oldTests.length); j++) {
-            var testName = oldTests[j];
-            var gradeData = student.grades[testName];
-            if (gradeData) {
-                group.tests.push({
-                    name: testName,
-                    data: gradeData
-                });
+    var group = {
+        tests: [],
+        label: ''
+    };
+    
+    for (var j = i; j < Math.min(i + groupSize, oldTests.length); j++) {
+        var testName = oldTests[j];
+        var gradeData = student.grades[testName];
+        if (gradeData) {
+            group.tests.push({
+                name: testName,
+                data: gradeData
+            });
+        }
+    }
+    
+    if (group.tests.length > 0) {
+        if (groupSize === 1) {
+            group.label = group.tests[0].name;
+        } else {
+            if (group.tests.length === 1) {
+                group.label = group.tests[0].name;
+            } else {
+                var firstNum = group.tests[0].name.match(/(\d+)회/);
+                var lastNum = group.tests[group.tests.length - 1].name.match(/(\d+)회/);
+                if (firstNum && lastNum) {
+                    group.label = firstNum[1] + '-' + lastNum[1] + '회 평균';
+                } else {
+                    group.label = group.tests.map(t => t.name).join(', ');
+                }
             }
         }
         
-        if (groupSize === 1) {
-    group.label = group.tests[0].name;
-} else {
-    // ⭐ 실제로 묶인 개수 확인 ⭐
-    if (group.tests.length === 1) {
-        group.label = group.tests[0].name;  // 1개면 개별 표시
-    } else {
-        var firstNum = group.tests[0].name.match(/(\d+)회/);
-        var lastNum = group.tests[group.tests.length - 1].name.match(/(\d+)회/);
-        if (firstNum && lastNum) {
-            group.label = firstNum[1] + '-' + lastNum[1] + '회 평균';
-        } else {
-            group.label = group.tests.map(t => t.name).join(', ');
-        }
+        groupedTests.push(group);
     }
-}
-            
-            groupedTests.push(group);
-        }
-    }
+}  // ← for (var i...) 닫기 ⭐
     
     // 2. 최근 10개는 개별 추가
     for (var i = 0; i < recentTests.length; i++) {
