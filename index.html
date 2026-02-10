@@ -3309,26 +3309,10 @@ function getGradeFromPercentile(percentile) {
     return 9;
 }
 
-// 시험 회차에 따른 등급컷 조정 함수
+// 시험 회차에 따른 등급컷 조정 함수 (현재 비활성화)
 function adjustScoreByTestNumber(score, testName) {
-    // 시험 이름에서 회차 추출 (예: "모클 10회" -> 10)
-    var match = testName.match(/(\d+)회/);
-    if (!match) return score;
-    
-    var testNumber = parseInt(match[1]);
-    
-    // 10회 단위로 등급컷 조정
-    var adjustment = 0;
-    if (testNumber >= 1 && testNumber <= 10) {
-        adjustment = 0;  // 1-10회: 조정 없음
-    } else if (testNumber >= 11 && testNumber <= 20) {
-        adjustment = 1;  // 11-20회: +1점 (85점 → 84점처럼 작용)
-    } else if (testNumber >= 21 && testNumber <= 30) {
-        adjustment = 2;  // 21-30회: +2점 (85점 → 83점처럼 작용)
-    }
-    
-    // 점수에 조정값 추가 (등급컷이 낮아지는 효과)
-    return score + adjustment;
+    // ⭐ 조정 없음 - 항상 원점수 그대로 반환 ⭐
+    return score;
 }
 
 // 📊 통계 계산 함수
