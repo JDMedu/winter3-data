@@ -6059,18 +6059,22 @@ function displaySummaryTable(student) {
             }
         }
         
-        if (group.tests.length > 0) {
-            if (groupSize === 1) {
-                group.label = group.tests[0].name;
-            } else {
-                var firstNum = group.tests[0].name.match(/(\d+)회/);
-                var lastNum = group.tests[group.tests.length - 1].name.match(/(\d+)회/);
-                if (firstNum && lastNum) {
-                    group.label = firstNum[1] + '-' + lastNum[1] + '회 평균';
-                } else {
-                    group.label = group.tests.map(t => t.name).join(', ');
-                }
-            }
+        if (groupSize === 1) {
+    group.label = group.tests[0].name;
+} else {
+    // ⭐ 실제로 묶인 개수 확인 ⭐
+    if (group.tests.length === 1) {
+        group.label = group.tests[0].name;  // 1개면 개별 표시
+    } else {
+        var firstNum = group.tests[0].name.match(/(\d+)회/);
+        var lastNum = group.tests[group.tests.length - 1].name.match(/(\d+)회/);
+        if (firstNum && lastNum) {
+            group.label = firstNum[1] + '-' + lastNum[1] + '회 평균';
+        } else {
+            group.label = group.tests.map(t => t.name).join(', ');
+        }
+    }
+}
             
             groupedTests.push(group);
         }
