@@ -6027,7 +6027,7 @@ function displaySummaryTable(student) {
     tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'매체 작문\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">매체작문 📊</th>';
     tableHtml += '</tr></thead><tbody>';
     
-      // ⭐ 데이터 그룹화 ⭐
+     // ⭐ 데이터 그룹화 ⭐
 var recentCount = 10;
 
 // 학생이 실제로 응시한 시험만 필터링
@@ -6042,15 +6042,15 @@ for (var t = 0; t < allTests.length; t++) {
 var attendedCount = attendedTests.length;
 var oldTests = attendedCount > recentCount ? attendedTests.slice(0, attendedCount - recentCount) : [];
 var recentTests = attendedCount > recentCount ? attendedTests.slice(attendedCount - recentCount) : attendedTests;
-    
-    var groupSize = 1;
-    if (oldTests.length > 20) {
-        groupSize = 3;
-    } else if (oldTests.length > 10) {
-        groupSize = 2;
-    }
-    
-    var groupedTests = [];
+
+var groupSize = 1;
+if (oldTests.length > 20) {
+    groupSize = 3;       // 20개 초과: 3회씩
+} else if (oldTests.length >= 10) {  // ⭐ >= 로 수정!
+    groupSize = 2;       // 10개 이상: 2회씩
+}
+
+var groupedTests = [];
     
    // 1. 오래된 시험 묶기
 for (var i = 0; i < oldTests.length; i += groupSize) {
