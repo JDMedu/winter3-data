@@ -6027,16 +6027,27 @@ function displaySummaryTable(student) {
     tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'매체 작문\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">매체작문 📊</th>';
     tableHtml += '</tr></thead><tbody>';
     
-   // ⭐ 데이터 그룹화 ⭐
+  // ⭐ 데이터 그룹화 ⭐
 var recentCount = 10;
-var oldTests = totalTests > recentCount ? allTests.slice(0, totalTests - recentCount) : [];
-var recentTests = totalTests > recentCount ? allTests.slice(totalTests - recentCount) : allTests;
-    
+
+// 학생이 실제로 응시한 시험만 필터링
+var attendedTests = [];
+for (var t = 0; t < allTests.length; t++) {
+    if (student.grades[allTests[t]]) {
+        attendedTests.push(allTests[t]);
+    }
+}
+
+// 실제 응시한 시험 기준으로 오래된 것/최근 것 분리
+var attendedCount = attendedTests.length;
+var oldTests = attendedCount > recentCount ? attendedTests.slice(0, attendedCount - recentCount) : [];
+var recentTests = attendedCount > recentCount ? attendedTests.slice(attendedCount - recentCount) : attendedTests;
+
 var groupSize = 1;
 if (oldTests.length > 20) {
-    groupSize = 3;       // 20개 초과: 3회씩
-} else if (oldTests.length >= 10) {  // ⭐ >= 로 수정!
-    groupSize = 2;       // 10개 이상: 2회씩
+    groupSize = 3;
+} else if (oldTests.length >= 10) {
+    groupSize = 2;
 }
 
 var groupedTests = [];
@@ -6051,15 +6062,13 @@ for (var i = 0; i < oldTests.length; i += groupSize) {
     for (var j = i; j < Math.min(i + groupSize, oldTests.length); j++) {
         var testName = oldTests[j];
         var gradeData = student.grades[testName];
-        if (gradeData) {  // ⭐ 이 조건 다시 추가!
-            group.tests.push({
-                name: testName,
-                data: gradeData
-            });
-        }
+        group.tests.push({
+            name: testName,
+            data: gradeData
+        });
     }
     
-    if (group.tests.length > 0) {  // ⭐ 빈 그룹 필터링
+    if (group.tests.length > 0) {
         if (group.tests.length === 1) {
             group.label = group.tests[0].name;
         } else {
