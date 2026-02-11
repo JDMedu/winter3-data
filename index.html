@@ -6027,7 +6027,7 @@ function displaySummaryTable(student) {
     tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'매체 작문\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">매체작문 📊</th>';
     tableHtml += '</tr></thead><tbody>';
     
-  // ⭐ 데이터 그룹화 ⭐
+ // ⭐ 데이터 그룹화 ⭐
 var recentCount = 10;
 
 // 학생이 실제로 응시한 시험만 필터링
@@ -6043,6 +6043,7 @@ var attendedCount = attendedTests.length;
 var oldTests = attendedCount > recentCount ? attendedTests.slice(0, attendedCount - recentCount) : [];
 var recentTests = attendedCount > recentCount ? attendedTests.slice(attendedCount - recentCount) : attendedTests;
 
+// groupSize는 오래된 응시 시험 개수로 결정
 var groupSize = 1;
 if (oldTests.length > 20) {
     groupSize = 3;
