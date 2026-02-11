@@ -6041,7 +6041,7 @@ if (oldTests.length > 20) {
 
 var groupedTests = [];
     
-  // 1. 오래된 시험 묶기
+ // 1. 오래된 시험 묶기
 for (var i = 0; i < oldTests.length; i += groupSize) {
     var group = {
         tests: [],
@@ -6051,13 +6051,15 @@ for (var i = 0; i < oldTests.length; i += groupSize) {
     for (var j = i; j < Math.min(i + groupSize, oldTests.length); j++) {
         var testName = oldTests[j];
         var gradeData = student.grades[testName];
-        group.tests.push({
-            name: testName,
-            data: gradeData
-        });
+        if (gradeData) {  // ⭐ 이 조건 다시 추가!
+            group.tests.push({
+                name: testName,
+                data: gradeData
+            });
+        }
     }
     
-    if (group.tests.length > 0) {
+    if (group.tests.length > 0) {  // ⭐ 빈 그룹 필터링
         if (group.tests.length === 1) {
             group.label = group.tests[0].name;
         } else {
