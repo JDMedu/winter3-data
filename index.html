@@ -6027,7 +6027,7 @@ function displaySummaryTable(student) {
     tableHtml += '<th style="min-width: 50px; font-size: 0.8em; cursor: pointer; transition: all 0.3s; background: rgba(102, 126, 234, 0.05);" onclick="openSubjectGraphClick(\'매체 작문\', \'' + student.attendanceNumber + '\')" title="클릭하면 그래프 보기">매체작문 📊</th>';
     tableHtml += '</tr></thead><tbody>';
     
- // ⭐ 데이터 그룹화 ⭐
+// ⭐ 데이터 그룹화 ⭐
 var recentCount = 10;
 
 // 학생이 실제로 응시한 시험만 필터링
@@ -6038,18 +6038,34 @@ for (var t = 0; t < allTests.length; t++) {
     }
 }
 
+console.log('===== 그룹화 디버깅 시작 =====');
+console.log('1. 전체 시험 개수:', allTests.length);
+console.log('2. 학생 응시 시험:', attendedTests.length, attendedTests);
+
 // 실제 응시한 시험 기준으로 오래된 것/최근 것 분리
 var attendedCount = attendedTests.length;
 var oldTests = attendedCount > recentCount ? attendedTests.slice(0, attendedCount - recentCount) : [];
 var recentTests = attendedCount > recentCount ? attendedTests.slice(attendedCount - recentCount) : attendedTests;
 
+console.log('3. attendedCount:', attendedCount);
+console.log('4. attendedCount > recentCount?', attendedCount > recentCount);
+console.log('5. oldTests 개수:', oldTests.length, oldTests);
+console.log('6. recentTests 개수:', recentTests.length, recentTests);
+
 // groupSize는 오래된 응시 시험 개수로 결정
 var groupSize = 1;
 if (oldTests.length > 20) {
     groupSize = 3;
+    console.log('7. groupSize = 3 (oldTests.length > 20)');
 } else if (oldTests.length >= 10) {
     groupSize = 2;
+    console.log('7. groupSize = 2 (oldTests.length >= 10)');
+} else {
+    console.log('7. groupSize = 1 (기본값)');
 }
+
+console.log('8. 최종 groupSize:', groupSize);
+console.log('===== 그룹화 디버깅 끝 =====');
 
 var groupedTests = [];
     
