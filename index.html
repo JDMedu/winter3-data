@@ -6038,38 +6038,22 @@ for (var t = 0; t < allTests.length; t++) {
     }
 }
 
-console.log('===== 그룹화 디버깅 시작 =====');
-console.log('1. 전체 시험 개수:', allTests.length);
-console.log('2. 학생 응시 시험:', attendedTests.length, attendedTests);
-
 // 실제 응시한 시험 기준으로 오래된 것/최근 것 분리
 var attendedCount = attendedTests.length;
 var oldTests = attendedCount > recentCount ? attendedTests.slice(0, attendedCount - recentCount) : [];
 var recentTests = attendedCount > recentCount ? attendedTests.slice(attendedCount - recentCount) : attendedTests;
 
-console.log('3. attendedCount:', attendedCount);
-console.log('4. attendedCount > recentCount?', attendedCount > recentCount);
-console.log('5. oldTests 개수:', oldTests.length, oldTests);
-console.log('6. recentTests 개수:', recentTests.length, recentTests);
-
 // groupSize는 오래된 응시 시험 개수로 결정
 var groupSize = 1;
-if (oldTests.length > 20) {
+if (oldTests.length > 15) {      // 15개 초과: 3회씩
     groupSize = 3;
-    console.log('7. groupSize = 3 (oldTests.length > 20)');
-} else if (oldTests.length >= 10) {
+} else if (oldTests.length >= 2) {  // 2개 이상: 2회씩
     groupSize = 2;
-    console.log('7. groupSize = 2 (oldTests.length >= 10)');
-} else {
-    console.log('7. groupSize = 1 (기본값)');
 }
-
-console.log('8. 최종 groupSize:', groupSize);
-console.log('===== 그룹화 디버깅 끝 =====');
 
 var groupedTests = [];
     
- // 1. 오래된 시험 묶기
+// 1. 오래된 시험 묶기
 for (var i = 0; i < oldTests.length; i += groupSize) {
     var group = {
         tests: [],
