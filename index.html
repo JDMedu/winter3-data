@@ -5428,8 +5428,10 @@ function extractGradeCuts(workbook) {
     }
     
     window.gradeCuts = gradeCuts;
-    console.log('최종 등급컷 데이터:', gradeCuts);
-    return gradeCuts;
+gradeCutCount = Object.keys(gradeCuts).length;  // ⭐ 이 줄 추가
+console.log('최종 등급컷 데이터:', gradeCuts);
+console.log('등급컷 시험 수:', gradeCutCount);  // ⭐ 확인용 로그 추가
+return gradeCuts;
 }
         
 // 점수로 등급 계산
