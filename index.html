@@ -3119,107 +3119,59 @@ function getTargetScoreFromGrade(grade) {
             };
         }
         
-        // 운세 표시 함수
+// 운세 표시 함수
         function displayStudyFortune(name) {
             var fortune = calculateStudyFortune(name);
             if (!fortune) return '';
             
             return `
-                <div class="ai-analysis" style="background: linear-gradient(135deg, ${fortune.data.bgColor}, ${fortune.data.bgColor}); color: #333; margin: 20px 0;">
-                    <div class="ai-analysis-header">
-                        <div class="ai-icon" style="background: ${fortune.data.bgColor}; color: #333;">
-                            ${fortune.data.icon}
-                        </div>
-                        <div>
-                            <h3 style="color: #333; font-size: 1.2em;">${name}님의 학업 운세</h3>
-                            <div style="font-size: 1.4em; font-weight: bold; margin-top: 6px;">
-                                <span style="color: #333;">${fortune.data.title}</span>
-                                <span style="color: #FFD700; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); margin-left: 8px;">${fortune.data.stars}</span>
+                <div class="ai-analysis" style="background: linear-gradient(135deg, ${fortune.data.bgColor}, ${fortune.data.bgColor}); color: #333; margin: 20px 0; padding: 15px 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between;">
+                        
+                        <!-- 제목 영역 -->
+                        <div style="display: flex; align-items: center; gap: 10px; min-width: 200px;">
+                            <span style="font-size: 1.6em;">${fortune.data.icon}</span>
+                            <div>
+                                <div style="color: #555; font-size: 0.85em;">${name}님의 학업 운세</div>
+                                <div style="font-weight: bold; color: #333; font-size: 1.05em;">${fortune.data.title} <span style="color: #FFD700; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">${fortune.data.stars}</span></div>
                             </div>
                         </div>
+                        
+                        <!-- 학습 조언 (1개) -->
+                        <div style="background: rgba(255,255,255,0.35); border-radius: 8px; padding: 8px 14px; flex: 1; min-width: 150px; max-width: 280px;">
+                            <span style="font-size: 0.75em; color: #666;">💡 조언</span>
+                            <div style="color: #444; font-size: 0.88em; font-weight: 500;">${fortune.data.selectedAdvice[0]}</div>
+                        </div>
+                        
+                        <!-- 행운의 과목 -->
+                        <div style="background: rgba(255,255,255,0.35); border-radius: 8px; padding: 8px 14px; min-width: 120px;">
+                            <div style="font-size: 0.75em; color: #666; margin-bottom: 4px;">📚 행운의 과목</div>
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                ${fortune.data.selectedSubjects.map(subject => 
+                                    `<span style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.78em; font-weight: bold;">${subject}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- 행운의 번호 -->
+                        <div style="background: rgba(255,255,255,0.35); border-radius: 8px; padding: 8px 14px; text-align: center; min-width: 80px;">
+                            <div style="font-size: 0.75em; color: #666; margin-bottom: 4px;">🍀 행운의 번호</div>
+                            <span style="background: linear-gradient(45deg, #ff6b6b, #feca57); color: white; font-size: 1.4em; font-weight: bold; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">${fortune.data.luckyNumber}</span>
+                        </div>
+                        
+                        <!-- 오늘의 팁 -->
+                        <div style="background: rgba(255,255,255,0.35); border-radius: 8px; padding: 8px 14px; flex: 1; min-width: 150px; max-width: 250px;">
+                            <span style="font-size: 0.75em; color: #666;">🎯 오늘의 팁</span>
+                            <div style="color: #444; font-size: 0.85em; font-style: italic;">"${fortune.data.selectedTip}"</div>
+                        </div>
+                        
                     </div>
                     
-                    <div class="ai-content">
-                        <div style="background: rgba(255, 255, 255, 0.3); border-radius: 10px; padding: 12px; margin: 10px 0;">
-                            <h4 style="color: #444; margin-bottom: 10px;">💡 오늘의 학습 조언</h4>
-                            <ul style="margin: 0; padding-left: 20px; color: #555;">
-                                ${fortune.data.selectedAdvice.map(advice => `<li style="margin-bottom: 5px;">${advice}</li>`).join('')}
-                            </ul>
-                        </div>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
-                            <div style="background: rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 15px;">
-                                <h4 style="color: #444; margin-bottom: 10px;">📚 행운의 과목</h4>
-                                <div style="display: flex; flex-direction: column; gap: 8px;">
-                                    ${fortune.data.selectedSubjects.map(subject => 
-                                        `<span style="background: linear-gradient(45deg, #667eea, #764ba2); color: white; padding: 6px 12px; border-radius: 15px; font-size: 0.9em; font-weight: bold; text-align: center;">${subject}</span>`
-                                    ).join('')}
-                                </div>
-                            </div>
-                            
-                            <div style="background: rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 15px;">
-                                <h4 style="color: #444; margin-bottom: 10px;">🍀 행운의 번호</h4>
-                                <div style="display: flex; justify-content: center; align-items: center; height: 60px;">
-                                    <span style="
-                                        background: linear-gradient(45deg, #ff6b6b, #feca57); 
-                                        color: white; 
-                                        font-size: 2em; 
-                                        font-weight: bold; 
-                                        width: 50px; 
-                                        height: 50px; 
-                                        border-radius: 50%; 
-                                        display: flex; 
-                                        align-items: center; 
-                                        justify-content: center;
-                                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                                    ">${fortune.data.luckyNumber}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="background: rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 15px; margin: 15px 0;">
-                            <h4 style="color: #444; margin-bottom: 10px;">🎯 오늘의 학습 팁</h4>
-                            <p style="color: #444; font-weight: 500; margin: 0; font-style: italic;">
-                                "${fortune.data.selectedTip}"
-                            </p>
-                        </div>
-                        
-                        <div style="font-size: 0.85em; color: #666; text-align: center; margin-top: 10px;">
-                            💡 운세는 재미로만 참고하세요. 진짜 중요한 건 꾸준한 노력입니다!
-                            <br><br>
-                            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                                <a href="https://www.instagram.com/swwweet.daekun/" target="_blank" style="
-                                    display: inline-flex; 
-                                    align-items: center; 
-                                    gap: 8px; 
-                                    background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D, #F56040, #F77737, #FCAF45, #FFDC80);
-                                    color: white; 
-                                    text-decoration: none; 
-                                    padding: 22px 42px; 
-                                    border-radius: 27px; 
-                                    font-weight: bold; 
-                                    font-size: 1.2em;
-                                    transition: transform 0.2s;
-                                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                    📸 관리자 대건T Instagram
-                                </a>
-                                <a href="https://jdmedu.github.io/university-predictor/" target="_blank" style="
-                                    display: inline-flex; 
-                                    align-items: center; 
-                                    gap: 8px; 
-                                    background: linear-gradient(45deg, #4CAF50, #45a049, #66BB6A, #81C784);
-                                    color: white; 
-                                    text-decoration: none; 
-                                    padding: 22px 42px; 
-                                    border-radius: 27px; 
-                                    font-weight: bold; 
-                                    font-size: 1.2em;
-                                    transition: transform 0.2s;
-                                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                                    🎓 대입 합격 예측 시스템
-                                </a>
-                            </div>
-                        </div>
+                    <!-- 하단 링크 -->
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
+                        <span style="font-size: 0.78em; color: #888;">💡 운세는 재미로만! 진짜 중요한 건 꾸준한 노력입니다</span>
+                        <a href="https://www.instagram.com/swwweet.daekun/" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(45deg, #405DE6, #C13584, #FD1D1D); color: white; text-decoration: none; padding: 6px 14px; border-radius: 15px; font-weight: bold; font-size: 0.82em;">📸 대건T Instagram</a>
+                        <a href="https://jdmedu.github.io/university-predictor/" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(45deg, #4CAF50, #66BB6A); color: white; text-decoration: none; padding: 6px 14px; border-radius: 15px; font-weight: bold; font-size: 0.82em;">🎓 대입 합격 예측</a>
                     </div>
                 </div>
             `;
@@ -3975,25 +3927,26 @@ document.addEventListener('click', function(e) {
     }
 });
         
-                // 📅 D-day 계산
+            // 📅 D-day 계산
         function calculateDday() {
             var today = new Date();
             
-            // 고2/고3 구분 (페이지 제목으로 판단)
             var iswinter3 = document.title.includes('고3');
             
             var examDate;
             if (iswinter3) {
-                examDate = new Date('2026-11-19'); // ✅ 고3: 26년 11.19.(목)
+                examDate = new Date('2026-11-19');
             } else {
-                examDate = new Date('2027-11-18'); // 고2: 27년 11.18.(목) 예상
+                examDate = new Date('2027-11-18');
             }
             
             var diffTime = examDate - today;
             var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            var diffWeeks = Math.ceil(diffDays / 7);
             
             return {
                 days: diffDays,
+                weeks: diffWeeks,
                 examDate: examDate,
                 iswinter3: iswinter3
             };
