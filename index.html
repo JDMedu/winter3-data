@@ -4277,6 +4277,33 @@ function performAIAnalysis(student) {
             });
         }
     });
+
+// 과목명 정규화 (띄어쓰기 통일)
+        var normalizedRatios = {};
+        var normalizedScores = {};
+        Object.keys(subjectRatios).forEach(function(key) {
+            var normalized = key
+                .replace('언어화법', '언어 화법')
+                .replace('매체작문', '매체 작문')
+                .replace('독서인문', '독서(인문,독서론)')
+                .replace('독서사회', '독서(사회)')
+                .replace('독서과학', '독서(과학)')
+                .replace('현대시', '문학(현대시)')
+                .replace('현대소설', '문학(현대소설)')
+                .replace('고전시가', '문학(고전시가)')
+                .replace('고전소설', '문학(고전소설)');
+            normalizedRatios[normalized] = subjectRatios[key];
+        });
+        Object.keys(subjectScores).forEach(function(key) {
+            var normalized = key
+                .replace('언어화법', '언어 화법')
+                .replace('매체작문', '매체 작문');
+            normalizedScores[normalized] = subjectScores[key];
+        });
+        subjectRatios = normalizedRatios;
+        subjectScores = normalizedScores;
+
+    
     
     // 통계 계산
     var avgScore = scoreValues.length > 0 ? Math.round(scoreValues.reduce((a, b) => a + b) / scoreValues.length) : 0;
