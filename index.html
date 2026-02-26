@@ -4010,6 +4010,7 @@ document.addEventListener('click', function(e) {
                 <div class="dday-counter">
                     <div class="dday-text">${dday.iswinter3 ? '🎯 수능' : '📚 수능'}까지</div>
                     <div class="dday-number">D-${dday.days}</div>
+                    <div style="font-size: 1.1em; opacity: 0.85; margin-top: -5px;">남은 주차: ${dday.weeks}주</div>
                     <div style="font-size: 1em; opacity: 0.9;">
                         ${dday.examDate.toLocaleDateString('ko-KR', {year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'})}
                     </div>
