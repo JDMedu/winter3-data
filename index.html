@@ -5969,10 +5969,11 @@ function displaySummaryTable(student) {
         tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
         tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
         
-        var testGrade;
+       var testGrade;
 if (window.gradeCuts && window.gradeCuts[testName]) {
     testGrade = calculateGradeFromCut(gradeData.score, testName, gradeData.subjectType);
-} else {
+}
+if (!testGrade) {
     var testPercentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
     testGrade = getGradeFromPercentile(testPercentile);
 }
