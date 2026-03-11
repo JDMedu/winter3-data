@@ -5499,7 +5499,7 @@ function calculateGradeFromCut(score, testName, subjectType) {
                         var testName = row[testNameColumn].toString().trim();
                         var source = row[sourceColumn].toString().trim();
                         
-                        if (testName.includes('모클') || testName.includes('이감') || testName.includes('진단')) {
+                        if (testName.includes('모클') || testName.includes('이감') || testName.includes('진단평가') || testName.includes('모의고사')) {
                             testSources[testName] = source;
                             console.log('출처 매핑:', testName, '->', source);
                         }
@@ -5546,7 +5546,7 @@ function calculateGradeFromCut(score, testName, subjectType) {
             
             for (var i = 0; i < allSheetNames.length; i++) {
                 var sheetName = allSheetNames[i];
-                if ((sheetName.includes('모클') || sheetName.includes('이감') || sheetName.includes('진단평가')) && 
+                if ((sheetName.includes('모클') || sheetName.includes('이감') || sheetName.includes('모의고사') || sheetName.includes('진단평가')) && 
                     !sheetName.includes('성적표') && sheetName !== '등급컷' && sheetName !== '출결번호') {
                     testSheetNames.push(sheetName);
                 }
