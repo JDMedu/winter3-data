@@ -6126,13 +6126,18 @@ for (var i = 0; i < recentTests.length; i++) {
         var totalGrade = 0;
         var gradeCount = 0;
         group.tests.forEach(function(test) {
-            var testPercentile = calculatePercentile(test.data.score, test.data.subjectType, test.name);
-            var testGrade = getGradeFromPercentile(testPercentile);
-            if (testGrade) {
-                totalGrade += testGrade;
-                gradeCount++;
-            }
-        });
+    var testGrade;
+    if (window.gradeCuts && window.gradeCuts[test.name]) {
+        testGrade = calculateGradeFromCut(test.data.score, test.name, test.data.subjectType);
+    } else {
+        var testPercentile = calculatePercentile(test.data.score, test.data.subjectType, test.name);
+        testGrade = getGradeFromPercentile(testPercentile);
+    }
+    if (testGrade) {
+        totalGrade += testGrade;
+        gradeCount++;
+    }
+});
         var avgGrade = gradeCount > 0 ? Math.round(totalGrade / gradeCount) : 9;
         tableHtml += '<td class="grade-cell grade-' + avgGrade + '" style="font-size: 0.85em;">' + avgGrade + '</td>';
         
