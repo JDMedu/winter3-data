@@ -5425,7 +5425,7 @@ function calculateGradeFromCut(score, testName, subjectType) {
     var track = getTrack(subjectType);
     var cuts = window.gradeCuts[testName][track];
     
-    if (!cuts) {
+     if (!cuts || cuts[1] === 0) {
         return null;
     }
     
@@ -6123,13 +6123,14 @@ for (var i = 0; i < recentTests.length; i++) {
         tableHtml += '<td class="score-cell" style="font-size: 0.85em;">' + avgScore + '</td>';
         
         // 평균 등급
-        var totalGrade = 0;
-        var gradeCount = 0;
-        group.tests.forEach(function(test) {
+var totalGrade = 0;
+var gradeCount = 0;
+group.tests.forEach(function(test) {
     var testGrade;
     if (window.gradeCuts && window.gradeCuts[test.name]) {
         testGrade = calculateGradeFromCut(test.data.score, test.name, test.data.subjectType);
-    } else {
+    }
+    if (!testGrade) {
         var testPercentile = calculatePercentile(test.data.score, test.data.subjectType, test.name);
         testGrade = getGradeFromPercentile(testPercentile);
     }
