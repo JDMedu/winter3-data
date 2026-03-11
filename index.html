@@ -5170,9 +5170,10 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                     }
                     
                     studentByNumber = data.students || {};
-                    maxScores = Object.assign({}, maxScores, data.maxScores || {});
-                    window.discoveredTestSheets = data.testSheets || [];
-                    window.attendanceToNameMap = data.attendanceMap || {};
+maxScores = Object.assign({}, maxScores, data.maxScores || {});
+window.gradeCuts = data.gradeCuts || {};
+window.discoveredTestSheets = data.testSheets || [];
+window.attendanceToNameMap = data.attendanceMap || {};
                     
                     var studentCount = Object.keys(studentByNumber).length;
                     console.log('로드된 학생 수:', studentCount);
@@ -5319,12 +5320,13 @@ function generateWeaknessDescription(criteria, recentAvg, studentRecentAvg) {
                     updateProgress(70, 'GitHub에 업로드 중...');
                     
                     var uploadData = {
-                    students: studentByNumber,
-                    maxScores: maxScores,
-                    testSheets: window.discoveredTestSheets,
-                    attendanceMap: window.attendanceToNameMap,
-                    lastUpdated: new Date().toISOString()
-                };
+    students: studentByNumber,
+    maxScores: maxScores,
+    gradeCuts: window.gradeCuts || {},
+    testSheets: window.discoveredTestSheets,
+    attendanceMap: window.attendanceToNameMap,
+    lastUpdated: new Date().toISOString()
+};
                     
                     uploadToGitHub(uploadData)
                         .then(function(result) {
@@ -5967,8 +5969,13 @@ function displaySummaryTable(student) {
         tableHtml += '<td class="source-cell"><span class="subject-type ' + subjectTypeClass + '">' + (gradeData.subjectType || '-') + '</span></td>';
         tableHtml += '<td class="score-cell">' + gradeData.score + '</td>';
         
-        var testPercentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
-        var testGrade = getGradeFromPercentile(testPercentile);
+        var testGrade;
+if (window.gradeCuts && window.gradeCuts[testName]) {
+    testGrade = calculateGradeFromCut(gradeData.score, testName, gradeData.subjectType);
+} else {
+    var testPercentile = calculatePercentile(gradeData.score, gradeData.subjectType, testName);
+    testGrade = getGradeFromPercentile(testPercentile);
+}
         tableHtml += '<td class="grade-cell grade-' + testGrade + '">' + testGrade + '</td>';
         
         tableHtml += '</tr>';
