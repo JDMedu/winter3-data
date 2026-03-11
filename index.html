@@ -5377,10 +5377,10 @@ function extractGradeCuts(workbook) {
     
     for (var i = 1; i < data.length; i++) {
         var row = data[i];
-        if (!row || !row[0] || !row[1]) continue;
-        
-        var testName = String(row[0]).trim();      // A열: 시험명
-        var subjectType = String(row[1]).trim();   // B열: 선택과목
+        if (!row || !row[0] || !row[2]) continue;
+
+var testName = String(row[0]).trim();      // A열: 시험명
+var subjectType = String(row[2]).trim();   // C열: 선택과목
         
         // 시험명으로 객체 생성
         if (!gradeCuts[testName]) {
@@ -5393,17 +5393,17 @@ function extractGradeCuts(workbook) {
             track = '언어와매체';
         }
         
-        // 등급컷 저장 (C열부터 1~8등급)
-        gradeCuts[testName][track] = {
-            1: parseFloat(row[2]) || 0,   // C열: 1등급
-            2: parseFloat(row[3]) || 0,   // D열: 2등급
-            3: parseFloat(row[4]) || 0,   // E열: 3등급
-            4: parseFloat(row[5]) || 0,   // F열: 4등급
-            5: parseFloat(row[6]) || 0,   // G열: 5등급
-            6: parseFloat(row[7]) || 0,   // H열: 6등급
-            7: parseFloat(row[8]) || 0,   // I열: 7등급
-            8: parseFloat(row[9]) || 0    // J열: 8등급
-        };
+        // 등급컷 저장 (D열부터 1~8등급)
+gradeCuts[testName][track] = {
+    1: parseFloat(row[3]) || 0,   // D열: 1등급
+    2: parseFloat(row[4]) || 0,   // E열: 2등급
+    3: parseFloat(row[5]) || 0,   // F열: 3등급
+    4: parseFloat(row[6]) || 0,   // G열: 4등급
+    5: parseFloat(row[7]) || 0,   // H열: 5등급
+    6: parseFloat(row[8]) || 0,   // I열: 6등급
+    7: parseFloat(row[9]) || 0,   // J열: 7등급
+    8: parseFloat(row[10]) || 0   // K열: 8등급
+};
         
         console.log('등급컷 추출:', testName, '-', track);
         console.log('  1등급:', gradeCuts[testName][track][1]);
