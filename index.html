@@ -1712,6 +1712,7 @@ css
 .comment-edit-area {
     width: 100%;
     min-height: 300px;
+    height: 300px;   /* ← 이 줄 추가 */
     padding: 30px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 10px;
@@ -5946,9 +5947,10 @@ function displaySummaryTable(student) {
     var totalTests = allTests.length;
     
     var tableHtml = '<div class="summary-table">';
-    tableHtml += '<h3>📊 전체 성적 현황 (고3 - ' + totalTests + '개 시험)</h3>';
-    tableHtml += '<table class="grade-table">';
-    tableHtml += '<thead><tr>';
+tableHtml += '<h3 onclick="toggleSummaryTable()" style="cursor:pointer; user-select:none;">📊 전체 성적 현황 (고3 - ' + totalTests + '개 시험) <span id="summaryToggleIcon">▶ 클릭하여 펼치기</span></h3>';
+tableHtml += '<div id="summaryTableBody" style="display:none;">';
+tableHtml += '<table class="grade-table">';
+tableHtml += '<thead><tr>';
     tableHtml += '<th class="test-name">시험</th>';
     tableHtml += '<th>선택과목</th>';
     tableHtml += '<th>점수</th>';
@@ -5982,7 +5984,7 @@ if (!testGrade) {
         tableHtml += '</tr>';
     }
     
-    tableHtml += '</tbody></table></div>';
+    tableHtml += '</tbody></table></div></div>';  // 기존 </div> 앞에 </div> 추가
     
     // ========== 두 번째 테이블: 과목별 성취도 (그룹화 적용) ==========
     tableHtml += '<div class="summary-table" style="margin-top: 30px;">';
@@ -6516,7 +6518,7 @@ if (comment) {
 html += '</div>';
             
             html += '<div id="commentEditArea" style="display: none;">';
-            html += '<textarea class="comment-edit-area" id="commentTextarea">' + comment + '</textarea>';
+            html += '<textarea class="comment-edit-area" id="commentTextarea" rows="12">' + comment + '</textarea>';
             html += '<div class="comment-buttons">';
             html += '<button class="comment-btn comment-btn-save" onclick="saveComment(\'' + attendanceNumber + '\')">💾 저장</button>';
             html += '<button class="comment-btn comment-btn-cancel" onclick="cancelEditComment()">✖️ 취소</button>';
@@ -7270,6 +7272,18 @@ function showInlineGraph(title, labels, data, yLabel, color, isPercentage, isGra
             }
         }
     });
+}
+
+function toggleSummaryTable() {
+    var body = document.getElementById('summaryTableBody');
+    var icon = document.getElementById('summaryToggleIcon');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.textContent = '▼ 클릭하여 접기';
+    } else {
+        body.style.display = 'none';
+        icon.textContent = '▶ 클릭하여 펼치기';
+    }
 }
         
     </script>
