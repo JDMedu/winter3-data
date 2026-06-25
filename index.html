@@ -6064,18 +6064,15 @@ for (var i = 0; i < oldTests.length; i += groupSize) {
         });
     }
     
-    if (group.tests.length > 0) {
+   if (group.tests.length > 0) {
         if (group.tests.length === 1) {
             group.label = group.tests[0].name;
         } else {
-            var firstNum = group.tests[0].name.match(/(\d+)회/);
-            var lastNum = group.tests[group.tests.length - 1].name.match(/(\d+)회/);
-            if (firstNum && lastNum) {
-                group.label = firstNum[1] + '-' + lastNum[1] + '회 평균';
-            } else {
-                group.label = group.tests.map(function(t) { return t.name; }).join(', ');
-            }
+            group.label = group.tests.map(function(t) { return t.name; }).join(', ') + ' 평균';
         }
+        
+        groupedTests.push(group);
+    }
         
         groupedTests.push(group);
     }
